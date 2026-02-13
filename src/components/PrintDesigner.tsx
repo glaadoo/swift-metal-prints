@@ -20,6 +20,7 @@ import {
   cardPricing,
 } from "@/lib/pricing";
 import { ArrowRight, ArrowLeft, Upload, CheckCircle2, ImagePlus, Layers, Sparkles, Heart } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 type ProductType = "metal" | "acrylic" | "cards";
 
@@ -29,7 +30,9 @@ const PrintDesigner = () => {
   const [step, setStep] = useState(0);
   const [product, setProduct] = useState<ProductType | null>(null);
   const [metalIdx, setMetalIdx] = useState(0);
-  const [sizeIdx, setSizeIdx] = useState(2);
+  const [sizeIdx, setSizeIdx] = useState<number | "custom">(2);
+  const [customW, setCustomW] = useState(24);
+  const [customH, setCustomH] = useState(36);
   const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
   const [roundedCorners, setRoundedCorners] = useState(false);
   const [standOff, setStandOff] = useState<"none" | "silver" | "black">("none");
@@ -38,19 +41,21 @@ const PrintDesigner = () => {
   const [fileName, setFileName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const size = standardSizes[sizeIdx];
-  const w = orientation === "portrait" ? size.w : size.h;
-  const h = orientation === "portrait" ? size.h : size.w;
+  const isCustom = sizeIdx === "custom";
+  const baseW = isCustom ? customW : standardSizes[sizeIdx].w;
+  const baseH = isCustom ? customH : standardSizes[sizeIdx].h;
+  const w = orientation === "portrait" ? baseW : baseH;
+  const h = orientation === "portrait" ? baseH : baseW;
 
   const getPrice = () => {
     if (product === "cards") return cardPricing.eternityCard.pack55;
-    if (product === "metal") return calcMetalPrice(size.w, size.h, metalOptions[metalIdx]);
-    return calcAcrylicPrice(size.w, size.h);
+    if (product === "metal") return calcMetalPrice(baseW, baseH, metalOptions[metalIdx]);
+    return calcAcrylicPrice(baseW, baseH);
   };
 
   const getShipping = () => {
     if (product === "cards") return { cost: 10, label: "Standard", note: undefined };
-    return getShippingCost(size.w, size.h);
+    return getShippingCost(baseW, baseH);
   };
 
   const getAddOns = () => {
@@ -223,7 +228,44 @@ const PrintDesigner = () => {
                             {s.label}
                           </button>
                         ))}
+                        <button
+                          onClick={() => setSizeIdx("custom")}
+                          className={`py-2 px-3 rounded-lg text-sm font-body font-medium border transition-all ${
+                            isCustom
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                          }`}
+                        >
+                          Custom
+                        </button>
                       </div>
+                      {isCustom && (
+                        <div className="flex gap-3 mt-3 items-center">
+                          <div className="flex-1">
+                            <Label className="text-xs text-muted-foreground font-body mb-1 block">Width (in)</Label>
+                            <Input
+                              type="number"
+                              min={4}
+                              max={96}
+                              value={customW}
+                              onChange={(e) => setCustomW(Math.max(4, Math.min(96, Number(e.target.value))))}
+                              className="bg-secondary border-border text-foreground font-body"
+                            />
+                          </div>
+                          <span className="text-muted-foreground font-body mt-5">×</span>
+                          <div className="flex-1">
+                            <Label className="text-xs text-muted-foreground font-body mb-1 block">Height (in)</Label>
+                            <Input
+                              type="number"
+                              min={4}
+                              max={96}
+                              value={customH}
+                              onChange={(e) => setCustomH(Math.max(4, Math.min(96, Number(e.target.value))))}
+                              className="bg-secondary border-border text-foreground font-body"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div>
