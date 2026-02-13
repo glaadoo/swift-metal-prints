@@ -38,8 +38,8 @@ const PriceCalculator = () => {
 
   let addOnTotal = 0;
   if (roundedCorners) addOnTotal += addOns.roundedCorners;
-  if (standOff === "silver") addOnTotal += addOns.standOffSilver * standOffQty;
-  if (standOff === "black") addOnTotal += addOns.standOffBlack * standOffQty;
+  if (material === "acrylic" && standOff === "silver") addOnTotal += addOns.standOffSilver * standOffQty;
+  if (material === "acrylic" && standOff === "black") addOnTotal += addOns.standOffBlack * standOffQty;
 
   const total = printPrice + shipping.cost + addOnTotal;
 
@@ -67,7 +67,10 @@ const PriceCalculator = () => {
               </Label>
               <RadioGroup
                 value={material}
-                onValueChange={(v) => setMaterial(v as "metal" | "acrylic")}
+                onValueChange={(v) => {
+                  setMaterial(v as "metal" | "acrylic");
+                  if (v === "metal") setStandOff("none");
+                }}
                 className="flex gap-6"
               >
                 <div className="flex items-center gap-2">
@@ -144,6 +147,7 @@ const PriceCalculator = () => {
                 </Label>
               </div>
 
+              {material === "acrylic" && (
               <div>
                 <Label className="text-foreground font-body text-sm mb-2 block">
                   Stand-Off Mounting
@@ -194,6 +198,7 @@ const PriceCalculator = () => {
                   </div>
                 )}
               </div>
+              )}
             </div>
 
             {/* Price breakdown */}
