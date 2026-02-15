@@ -183,7 +183,6 @@ const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onN
                     onClick={() => onSelect(idx)}
                   >
                     <p className="text-[11px] font-display font-bold text-foreground leading-tight whitespace-nowrap">{size.label}</p>
-                    <p className="text-[10px] font-display font-bold text-primary">${price}</p>
                   </Card>
                 );
               })}
