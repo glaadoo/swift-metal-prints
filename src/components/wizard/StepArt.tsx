@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +49,26 @@ const StepArt = ({ image, uploadedFile, onSelect, onUpload, onNext }: Props) => 
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  // Load curated photos on mount
+  useEffect(() => {
+    const loadCurated = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(
+          `https://api.pexels.com/v1/curated?per_page=20`,
+          { headers: { Authorization: PEXELS_API_KEY } }
+        );
+        const data = await res.json();
+        setPhotos(data.photos || []);
+      } catch {
+        setPhotos([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadCurated();
   }, []);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,7 +147,7 @@ const StepArt = ({ image, uploadedFile, onSelect, onUpload, onNext }: Props) => 
         </div>
       )}
 
-      {!loading && searched && photos.length > 0 && (
+      {!loading && photos.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {photos.map((photo) => (
             <Card
@@ -148,12 +168,12 @@ const StepArt = ({ image, uploadedFile, onSelect, onUpload, onNext }: Props) => 
         </div>
       )}
 
-      {!loading && !searched && (
+      {!loading && !searched && photos.length === 0 && (
         <div className="text-center py-12">
           <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
             <Camera className="w-7 h-7 text-primary" />
           </div>
-          <p className="text-muted-foreground font-body">Search or select a genre above</p>
+          <p className="text-muted-foreground font-body">Loading curated gallery...</p>
         </div>
       )}
 
