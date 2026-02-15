@@ -7,6 +7,7 @@ import { ArrowRight, ArrowLeft, RectangleHorizontal, RectangleVertical, Sparkles
 import roomBackdrop from "@/assets/room-backdrop.jpg";
 import acrylicImg from "@/assets/acrylic-print.jpg";
 import metalImg from "@/assets/metal-print.jpg";
+import metalMuseumImg from "@/assets/metal-museum-print.jpg";
 import type { MaterialChoice } from "./types";
 
 interface Props {
@@ -22,7 +23,7 @@ interface Props {
 const materialOptions: { id: MaterialChoice; label: string; subtitle: string; img: string; icon: React.ReactNode }[] = [
   { id: "acrylic", label: "Acrylic", subtitle: "Vivid & Luminous", img: acrylicImg, icon: <Sparkles className="w-4 h-4" /> },
   { id: "metal-designer", label: "Metal Designer", subtitle: '.040" Lightweight', img: metalImg, icon: <Gem className="w-4 h-4" /> },
-  { id: "metal-museum", label: "Metal Museum", subtitle: '.080" Heirloom', img: metalImg, icon: <Shield className="w-4 h-4" /> },
+  { id: "metal-museum", label: "Metal Museum", subtitle: '.080" Heirloom', img: metalMuseumImg, icon: <Shield className="w-4 h-4" /> },
 ];
 
 // Group sizes for visual comparison
@@ -46,17 +47,18 @@ const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onN
   const displayW = orientation === "portrait" ? Math.min(selected.w, selected.h) : Math.max(selected.w, selected.h);
   const displayH = orientation === "portrait" ? Math.max(selected.w, selected.h) : Math.min(selected.w, selected.h);
 
-  // Print width as % of wall; height derived from aspect ratio
   const printWidthPct = Math.max((displayW / WALL_WIDTH_IN) * 100, 8);
-  // The couch top is at ~60% of the image. Keep print bottom above 58%.
+  // Container is 16:9, so its height = width * 9/16.
+  // Print width in % of container width is straightforward.
+  // Print height in % of container height: (displayH / WALL_WIDTH_IN) / (9/16) * 100
+  // Simplified: displayH / WALL_WIDTH_IN * 16/9 * 100... but that's wrong for non-square.
+  // Correct: printHeightPct of container = (printRealHeight / wallRealHeight) * 100
+  // wallRealHeight = WALL_WIDTH_IN * 9/16 = 67.5"
+  const WALL_HEIGHT_IN = WALL_WIDTH_IN * (9 / 16);
+  const printHeightPct = (displayH / WALL_HEIGHT_IN) * 100;
   const maxBottomPct = 58;
-  // Center print vertically in the wall area (top 0% to 58%)
-  const wallAreaPct = maxBottomPct;
-  // Print height as % of container (approximate: container is 16:9 so height = width * 9/16 of container)
-  // Use aspect ratio to calculate height from width
-  const printHeightPct = printWidthPct * (displayH / displayW) * (16 / 9);
-  const clampedHeightPct = Math.min(printHeightPct, wallAreaPct - 4);
-  const topPct = Math.max(2, (wallAreaPct - clampedHeightPct) / 2);
+  const clampedHeightPct = Math.min(printHeightPct, maxBottomPct - 4);
+  const topPct = Math.max(2, (maxBottomPct - clampedHeightPct) / 2);
 
   const displayLabel = isSquare
     ? selected.label
