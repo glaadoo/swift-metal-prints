@@ -20,13 +20,12 @@ interface Props {
   onBack: () => void;
 }
 
-const materialOptions: { id: MaterialChoice; label: string; subtitle: string; img: string; icon: React.ReactNode }[] = [
+const materialOpts: { id: MaterialChoice; label: string; subtitle: string; img: string; icon: React.ReactNode }[] = [
   { id: "metal-designer", label: "Metal Designer", subtitle: '.040" Lightweight', img: metalImg, icon: <Gem className="w-4 h-4" /> },
   { id: "metal-museum", label: "Metal Museum", subtitle: '.080" Heirloom', img: metalMuseumImg, icon: <Shield className="w-4 h-4" /> },
   { id: "acrylic", label: "Acrylic", subtitle: "Vivid & Luminous", img: acrylicImg, icon: <Sparkles className="w-4 h-4" /> },
 ];
 
-// Group sizes for visual comparison
 const sizeGroups = [
   { label: "Desk & Shelf", range: [0, 4] as const },
   { label: "Wall Art", range: [4, 10] as const },
@@ -34,8 +33,6 @@ const sizeGroups = [
   { label: "Grand Scale", range: [16, 21] as const },
 ];
 
-// The backdrop represents roughly a 120" wide wall.
-// The couch sits at ~62% from top in the image, so prints must stay above that.
 const WALL_WIDTH_IN = 120;
 
 const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onNext, onBack }: Props) => {
@@ -67,18 +64,11 @@ const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onN
     isDragging.current = false;
   }, []);
 
-  // Apply orientation: swap w/h for portrait when w > h (or vice versa)
   const isSquare = selected.w === selected.h;
   const displayW = orientation === "portrait" ? Math.min(selected.w, selected.h) : Math.max(selected.w, selected.h);
   const displayH = orientation === "portrait" ? Math.max(selected.w, selected.h) : Math.min(selected.w, selected.h);
 
   const printWidthPct = Math.max((displayW / WALL_WIDTH_IN) * 100, 8);
-  // Container is 16:9, so its height = width * 9/16.
-  // Print width in % of container width is straightforward.
-  // Print height in % of container height: (displayH / WALL_WIDTH_IN) / (9/16) * 100
-  // Simplified: displayH / WALL_WIDTH_IN * 16/9 * 100... but that's wrong for non-square.
-  // Correct: printHeightPct of container = (printRealHeight / wallRealHeight) * 100
-  // wallRealHeight = WALL_WIDTH_IN * 9/16 = 67.5"
   const WALL_HEIGHT_IN = WALL_WIDTH_IN * (9 / 16);
   const printHeightPct = (displayH / WALL_HEIGHT_IN) * 100;
   const maxBottomPct = 58;
@@ -91,90 +81,72 @@ const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onN
       ? `${Math.min(selected.w, selected.h)}"×${Math.max(selected.w, selected.h)}"`
       : `${Math.max(selected.w, selected.h)}"×${Math.min(selected.w, selected.h)}"`;
 
+  const getPriceForSize = (w: number, h: number) => {
+    if (material === "acrylic") return calcAcrylicPrice(w, h);
+    if (material === "metal-designer") return calcMetalPrice(w, h, metalOptions[0]);
+    return calcMetalPrice(w, h, metalOptions[2]);
+  };
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div className="text-center">
         <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground">
           Choose Your Size
         </h2>
-        <p className="text-muted-foreground font-body mt-2 tracking-wide text-sm">
-          Tap any size to preview your art at real-world scale.
+        <p className="text-muted-foreground font-body mt-1 tracking-wide text-sm">
+          Tap any size to preview at real-world scale.
         </p>
       </div>
 
       {/* Room mockup preview */}
       <div className="flex justify-center">
         <div className="relative w-full overflow-hidden rounded-lg border border-border" style={{ maxWidth: 520, aspectRatio: "16/9" }}>
-          <img
-            src={roomBackdrop}
-            alt="Room scene"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-           <div
-              className="absolute left-1/2 -translate-x-1/2 shadow-2xl transition-all duration-500 ease-out overflow-hidden cursor-grab active:cursor-grabbing"
+          <img src={roomBackdrop} alt="Room scene" className="absolute inset-0 w-full h-full object-cover" />
+          <div
+            className="absolute left-1/2 -translate-x-1/2 shadow-2xl transition-all duration-500 ease-out overflow-hidden cursor-grab active:cursor-grabbing"
+            style={{
+              width: `${printWidthPct}%`,
+              aspectRatio: `${displayW} / ${displayH}`,
+              maxHeight: `${maxBottomPct - 4}%`,
+              top: `${topPct}%`,
+            }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+          >
+            <img
+              src={imageUrl}
+              alt="Print preview"
+              className="w-full h-full object-cover select-none pointer-events-none"
+              draggable={false}
               style={{
-                width: `${printWidthPct}%`,
-                aspectRatio: `${displayW} / ${displayH}`,
-                maxHeight: `${maxBottomPct - 4}%`,
-                top: `${topPct}%`,
+                transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+                transformOrigin: "center center",
               }}
-              onPointerDown={handlePointerDown}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-            >
-              <img
-                src={imageUrl}
-                alt="Print preview"
-                className="w-full h-full object-cover select-none pointer-events-none"
-                draggable={false}
-                style={{
-                  transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
-                  transformOrigin: "center center",
-                }}
-              />
-            </div>
-            {/* Zoom controls */}
-            <div className="absolute top-2 right-2 flex flex-col gap-1">
-              <button
-                onClick={() => { setZoom((z) => Math.min(z + 0.25, 3)); setPan({ x: 0, y: 0 }); }}
-                className="w-6 h-6 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-                title="Zoom in"
-              >
-                <ZoomIn className="w-3.5 h-3.5" />
+            />
+          </div>
+          {/* Zoom controls */}
+          <div className="absolute top-2 right-2 flex flex-col gap-1">
+            <button onClick={() => { setZoom((z) => Math.min(z + 0.25, 3)); setPan({ x: 0, y: 0 }); }} className="w-6 h-6 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom in">
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+            <button onClick={() => { setZoom((z) => Math.max(z - 0.25, 1)); setPan({ x: 0, y: 0 }); }} className="w-6 h-6 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom out">
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+            {zoom > 1 && (
+              <button onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} className="w-6 h-6 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Reset">
+                <Move className="w-3.5 h-3.5" />
               </button>
-              <button
-                onClick={() => { setZoom((z) => Math.max(z - 0.25, 1)); setPan({ x: 0, y: 0 }); }}
-                className="w-6 h-6 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-                title="Zoom out"
-              >
-                <ZoomOut className="w-3.5 h-3.5" />
-              </button>
-              {zoom > 1 && (
-                <button
-                  onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
-                  className="w-6 h-6 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-                  title="Reset"
-                >
-                  <Move className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
+            )}
+          </div>
           {/* Size label + orientation toggle */}
           <div className="absolute bottom-2 right-2 flex items-center gap-1.5">
             {!isSquare && (
               <div className="flex bg-card/80 backdrop-blur-sm border border-border rounded overflow-hidden">
-                <button
-                  onClick={() => setOrientation("landscape")}
-                  className={`p-1 transition-colors ${orientation === "landscape" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
-                  title="Landscape"
-                >
+                <button onClick={() => setOrientation("landscape")} className={`p-1 transition-colors ${orientation === "landscape" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`} title="Landscape">
                   <RectangleHorizontal className="w-3.5 h-3.5" />
                 </button>
-                <button
-                  onClick={() => setOrientation("portrait")}
-                  className={`p-1 transition-colors ${orientation === "portrait" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`}
-                  title="Portrait"
-                >
+                <button onClick={() => setOrientation("portrait")} className={`p-1 transition-colors ${orientation === "portrait" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`} title="Portrait">
                   <RectangleVertical className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -187,13 +159,46 @@ const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onN
         </div>
       </div>
 
-      {/* Material selection */}
+      {/* Size selection — directly under preview */}
+      {sizeGroups.map((group) => {
+        const items = standardSizes.slice(group.range[0], group.range[1]);
+        return (
+          <div key={group.label}>
+            <h3 className="text-[10px] font-body font-semibold tracking-[0.2em] uppercase text-primary mb-1.5">
+              {group.label}
+            </h3>
+            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+              {items.map((size, i) => {
+                const idx = group.range[0] + i;
+                const isSelected = idx === sizeIdx;
+                const price = getPriceForSize(size.w, size.h);
+                return (
+                  <Card
+                    key={idx}
+                    className={`px-2.5 py-1.5 text-center cursor-pointer transition-all duration-200 shrink-0 ${
+                      isSelected
+                        ? "ring-2 ring-primary border-primary bg-primary/5"
+                        : "border-border hover:border-primary/40"
+                    }`}
+                    onClick={() => onSelect(idx)}
+                  >
+                    <p className="text-[11px] font-display font-bold text-foreground leading-tight whitespace-nowrap">{size.label}</p>
+                    <p className="text-[10px] font-display font-bold text-primary">${price}</p>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      {/* Material selection — below sizes */}
       <div>
         <h3 className="text-[10px] font-body font-semibold tracking-[0.2em] uppercase text-primary mb-1.5">
           Choose Your Medium
         </h3>
         <div className="grid grid-cols-3 gap-3">
-          {materialOptions.map((mat) => {
+          {materialOpts.map((mat) => {
             const isSelected = material === mat.id;
             const size = standardSizes[sizeIdx];
             const price = mat.id === "acrylic"
@@ -242,40 +247,6 @@ const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onN
           })}
         </div>
       </div>
-
-
-      {/* Horizontal scrollable size rows */}
-      {sizeGroups.map((group) => {
-        const items = standardSizes.slice(group.range[0], group.range[1]);
-        return (
-          <div key={group.label}>
-            <h3 className="text-[10px] font-body font-semibold tracking-[0.2em] uppercase text-primary mb-1.5">
-              {group.label}
-            </h3>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-              {items.map((size, i) => {
-                const idx = group.range[0] + i;
-                const isSelected = idx === sizeIdx;
-                const price = calcMetalPrice(size.w, size.h, metalOptions[0]);
-                return (
-                  <Card
-                    key={idx}
-                    className={`px-2.5 py-1.5 text-center cursor-pointer transition-all duration-200 shrink-0 ${
-                      isSelected
-                        ? "ring-2 ring-primary border-primary bg-primary/5"
-                        : "border-border hover:border-primary/40"
-                    }`}
-                    onClick={() => onSelect(idx)}
-                  >
-                    <p className="text-[11px] font-display font-bold text-foreground leading-tight whitespace-nowrap">{size.label}</p>
-                    <p className="text-[10px] font-display font-bold text-primary">${price}</p>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
 
       {/* Navigation */}
       <div className="flex justify-between pt-4">
