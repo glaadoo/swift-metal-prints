@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
@@ -25,6 +26,8 @@ const jsonLd = {
 };
 
 const Index = () => {
+  const [wizardStep, setWizardStep] = useState(1);
+
   return (
     <div id="top" className="min-h-screen bg-background">
       <script
@@ -35,8 +38,8 @@ const Index = () => {
       <main>
         <Hero />
         <HowItWorks />
-        <PrintWizard />
-        <BundlesSection />
+        <PrintWizard onStepChange={setWizardStep} />
+        {wizardStep <= 1 && <BundlesSection />}
         <Testimonials />
         <FAQ />
         <FinalCTA />

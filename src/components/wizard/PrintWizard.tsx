@@ -10,12 +10,20 @@ import StepReview from "./StepReview";
 
 const stepLabels = ["Artwork", "Size", "Material", "Personalize", "Finishing", "Review"];
 
-const PrintWizard = () => {
+interface Props {
+  onStepChange?: (step: number) => void;
+}
+
+const PrintWizard = ({ onStepChange }: Props) => {
   const [state, setState] = useState<WizardState>(initialWizardState);
 
   const update = useCallback((patch: Partial<WizardState>) => {
-    setState((prev) => ({ ...prev, ...patch }));
-  }, []);
+    setState((prev) => {
+      const next = { ...prev, ...patch };
+      if (patch.step !== undefined && onStepChange) onStepChange(next.step);
+      return next;
+    });
+  }, [onStepChange]);
 
   const goTo = (step: number) => update({ step });
 
