@@ -1,58 +1,86 @@
-import { ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroBg from "@/assets/hero-bg.jpg";
+import { Star, Shield, Truck } from "lucide-react";
+import heroImg from "@/assets/hero-lifestyle.jpg";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background image */}
+    <section className="relative min-h-screen flex items-end pb-20 md:pb-28 overflow-hidden">
+      {/* Background */}
       <div className="absolute inset-0">
-        <img src={heroBg} alt="Luxury metal print on wall" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-background/80" />
+        <img
+          src={heroImg}
+          alt="Luxury metal print displayed in modern living room"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />
       </div>
 
-      <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
-        <div className="mb-6">
-          <span className="inline-block text-sm tracking-[0.3em] uppercase text-primary font-body">
-            Premium Metal & Acrylic
-          </span>
-        </div>
+      <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
+        <div className="max-w-2xl">
+          {/* Trust badge */}
+          <div className="flex items-center gap-1.5 mb-6">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+            ))}
+            <span className="text-sm font-body text-foreground/80 ml-2">
+              Rated 4.8 by 2,000+ customers
+            </span>
+          </div>
 
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold mb-6 leading-tight">
-          <span className="text-gradient-gold">Luxury</span>
-          <br />
-          <span className="text-foreground">Metal Prints</span>
-        </h1>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-[1.05] mb-6">
+            <span className="text-foreground">Your Photos,</span>
+            <br />
+            <span className="text-gradient-gold italic">Immortalized</span>
+            <br />
+            <span className="text-foreground">in Metal</span>
+          </h1>
 
-        <p className="text-lg md:text-xl text-muted-foreground font-body font-light max-w-2xl mx-auto mb-4">
-          Stunning metal eternity cards, business cards, invitations, prayer cards
-          & custom prints. Crafted with precision, delivered with care.
-        </p>
+          <p className="text-base md:text-lg text-foreground/60 font-body font-light max-w-lg mb-8 leading-relaxed">
+            Museum-grade metal & acrylic prints that transform your cherished
+            memories into stunning wall art. Handcrafted in the USA.
+          </p>
 
-        <p className="text-primary font-body font-semibold tracking-wide text-sm mb-10">
-          DELIVERED IN 48–72 HOURS
-        </p>
+          <div className="flex flex-col sm:flex-row gap-3 mb-12">
+            <Button
+              size="lg"
+              className="bg-gradient-gold text-primary-foreground font-body font-semibold tracking-wider hover:opacity-90 px-10 h-14 text-sm"
+              onClick={() =>
+                document
+                  .getElementById("shop-by-size")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
+            >
+              SHOP NOW
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-foreground/20 text-foreground font-body tracking-wider hover:bg-foreground/5 px-10 h-14 text-sm"
+              onClick={() =>
+                document
+                  .getElementById("calculator")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
+            >
+              CUSTOM QUOTE
+            </Button>
+          </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button
-            size="lg"
-            className="bg-gradient-gold text-primary-foreground font-body font-semibold tracking-wide hover:opacity-90 transition-opacity px-8"
-            onClick={() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })}
-          >
-            Explore Products
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="border-primary text-primary font-body tracking-wide hover:bg-primary hover:text-primary-foreground transition-colors px-8"
-            onClick={() => document.getElementById("calculator")?.scrollIntoView({ behavior: "smooth" })}
-          >
-            Get a Quote
-          </Button>
-        </div>
-
-        <div className="mt-16 animate-bounce">
-          <ArrowDown className="w-5 h-5 text-primary mx-auto" />
+          {/* Value props */}
+          <div className="flex flex-wrap gap-6 text-xs font-body text-foreground/50 uppercase tracking-wider">
+            <span className="flex items-center gap-2">
+              <Truck className="w-4 h-4 text-primary" />
+              Free Shipping $150+
+            </span>
+            <span className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-primary" />
+              Lifetime Guarantee
+            </span>
+            <span className="flex items-center gap-2">
+              <Star className="w-4 h-4 text-primary" />
+              Made in USA
+            </span>
+          </div>
         </div>
       </div>
     </section>
