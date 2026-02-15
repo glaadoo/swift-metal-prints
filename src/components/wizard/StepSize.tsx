@@ -91,10 +91,10 @@ const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onN
         {(() => {
           const isDesk = sizeIdx < 4;
           const backdropImg = isDesk ? shelfBackdrop : couchWall;
-          // Shelf scene ~36" wide; couch wall scene ~96"
-          const WALL_W = isDesk ? 36 : 96;
-          const containerAspect = isDesk ? "1/1" : "16/9";
-          const containerRatio = isDesk ? 1 : 16 / 9;
+          // Shelf scene ~24" wide (zoomed in); couch wall scene ~96"
+          const WALL_W = isDesk ? 24 : 96;
+          const containerAspect = isDesk ? "3/4" : "16/9";
+          const containerRatio = isDesk ? 3 / 4 : 16 / 9;
           // Scale print width relative to scene width
           const printWPct = Math.max((displayW / WALL_W) * 100, 10);
           // Derive height from width using print's true aspect ratio, adjusted for container shape
