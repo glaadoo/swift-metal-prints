@@ -1,19 +1,29 @@
 import { useState } from "react";
-import { standardSizes, calcMetalPrice, metalOptions } from "@/lib/pricing";
+import { standardSizes, calcMetalPrice, calcAcrylicPrice, metalOptions } from "@/lib/pricing";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, RectangleHorizontal, RectangleVertical, Sparkles, Shield } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, ArrowLeft, RectangleHorizontal, RectangleVertical, Sparkles, Shield, Gem, Check, RotateCw } from "lucide-react";
 import roomBackdrop from "@/assets/room-backdrop.jpg";
 import acrylicImg from "@/assets/acrylic-print.jpg";
 import metalImg from "@/assets/metal-print.jpg";
+import type { MaterialChoice } from "./types";
 
 interface Props {
   imageUrl: string;
   sizeIdx: number;
+  material: MaterialChoice;
   onSelect: (idx: number) => void;
+  onSelectMaterial: (m: MaterialChoice) => void;
   onNext: () => void;
   onBack: () => void;
 }
+
+const materialOptions: { id: MaterialChoice; label: string; subtitle: string; img: string; icon: React.ReactNode }[] = [
+  { id: "acrylic", label: "Acrylic", subtitle: "Vivid & Luminous", img: acrylicImg, icon: <Sparkles className="w-4 h-4" /> },
+  { id: "metal-designer", label: "Metal Designer", subtitle: '.040" Lightweight', img: metalImg, icon: <Gem className="w-4 h-4" /> },
+  { id: "metal-museum", label: "Metal Museum", subtitle: '.080" Heirloom', img: metalImg, icon: <Shield className="w-4 h-4" /> },
+];
 
 // Group sizes for visual comparison
 const sizeGroups = [
@@ -27,7 +37,7 @@ const sizeGroups = [
 // The couch sits at ~62% from top in the image, so prints must stay above that.
 const WALL_WIDTH_IN = 120;
 
-const StepSize = ({ imageUrl, sizeIdx, onSelect, onNext, onBack }: Props) => {
+const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onNext, onBack }: Props) => {
   const selected = standardSizes[sizeIdx];
   const [orientation, setOrientation] = useState<"landscape" | "portrait">("landscape");
 
@@ -113,43 +123,54 @@ const StepSize = ({ imageUrl, sizeIdx, onSelect, onNext, onBack }: Props) => {
         </div>
       </div>
 
-      {/* Side-by-side material previews */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Acrylic preview */}
-        <div className="bg-card border border-border rounded-lg overflow-hidden">
-          <div className="aspect-[4/3] relative overflow-hidden">
-            <img src={acrylicImg} alt="Acrylic finish" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="absolute bottom-2 left-2 right-2">
-              <div className="flex items-center gap-1.5 text-white">
-                <Sparkles className="w-4 h-4 shrink-0" />
-                <span className="font-display font-bold text-sm">Acrylic</span>
-              </div>
-            </div>
-          </div>
-          <ul className="p-3 space-y-1">
-            <li className="text-[10px] font-body text-muted-foreground">✦ Face-mounted to ¼″ acrylic</li>
-            <li className="text-[10px] font-body text-muted-foreground">✦ Extraordinary depth & vibrancy</li>
-            <li className="text-[10px] font-body text-muted-foreground">✦ UV-resistant archival inks</li>
-          </ul>
-        </div>
-        {/* Metal preview */}
-        <div className="bg-card border border-border rounded-lg overflow-hidden">
-          <div className="aspect-[4/3] relative overflow-hidden">
-            <img src={metalImg} alt="Metal finish" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="absolute bottom-2 left-2 right-2">
-              <div className="flex items-center gap-1.5 text-white">
-                <Shield className="w-4 h-4 shrink-0" />
-                <span className="font-display font-bold text-sm">Metal</span>
-              </div>
-            </div>
-          </div>
-          <ul className="p-3 space-y-1">
-            <li className="text-[10px] font-body text-muted-foreground">✦ Dye-sublimation on aluminum</li>
-            <li className="text-[10px] font-body text-muted-foreground">✦ Scratch & fade resistant</li>
-            <li className="text-[10px] font-body text-muted-foreground">✦ Double-sided — flip for 2 looks</li>
-          </ul>
+      {/* Material selection */}
+      <div>
+        <h3 className="text-[10px] font-body font-semibold tracking-[0.2em] uppercase text-primary mb-1.5">
+          Choose Your Medium
+        </h3>
+        <div className="grid grid-cols-3 gap-3">
+          {materialOptions.map((mat) => {
+            const isSelected = material === mat.id;
+            const size = standardSizes[sizeIdx];
+            const price = mat.id === "acrylic"
+              ? calcAcrylicPrice(size.w, size.h)
+              : mat.id === "metal-designer"
+                ? calcMetalPrice(size.w, size.h, metalOptions[0])
+                : calcMetalPrice(size.w, size.h, metalOptions[2]);
+            return (
+              <Card
+                key={mat.id}
+                className={`overflow-hidden cursor-pointer transition-all duration-200 ${
+                  isSelected ? "ring-2 ring-primary border-primary" : "border-border hover:border-primary/40"
+                }`}
+                onClick={() => onSelectMaterial(mat.id)}
+              >
+                <div className="aspect-[16/9] relative overflow-hidden">
+                  <img src={mat.img} alt={mat.label} className="w-full h-full object-cover" />
+                  {isSelected && (
+                    <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                      <Check className="w-3 h-3 text-primary-foreground" />
+                    </div>
+                  )}
+                  {mat.id.startsWith("metal") && (
+                    <div className="absolute bottom-1 left-1">
+                      <Badge className="bg-card/80 backdrop-blur-sm text-foreground border-0 font-body text-[8px] gap-0.5 px-1 py-0">
+                        <RotateCw className="w-2.5 h-2.5" /> 2-sided
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+                <div className="p-2 text-center">
+                  <div className="flex items-center justify-center gap-1 text-primary">
+                    {mat.icon}
+                    <span className="text-xs font-display font-bold text-foreground">{mat.label}</span>
+                  </div>
+                  <p className="text-[9px] text-muted-foreground font-body">{mat.subtitle}</p>
+                  <p className="text-sm font-display font-bold text-gradient-gold mt-0.5">${price}</p>
+                </div>
+              </Card>
+            );
+          })}
         </div>
       </div>
 
@@ -192,7 +213,7 @@ const StepSize = ({ imageUrl, sizeIdx, onSelect, onNext, onBack }: Props) => {
           <ArrowLeft className="w-4 h-4" /> Back
         </Button>
         <Button onClick={onNext} className="bg-gradient-gold text-primary-foreground font-body font-semibold hover:opacity-90 gap-2">
-          Choose Material <ArrowRight className="w-4 h-4" />
+          {material.startsWith("metal") ? "Personalize" : "Finishing"} <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
     </div>

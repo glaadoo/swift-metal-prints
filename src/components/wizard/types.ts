@@ -21,7 +21,7 @@ export interface WizardState {
   roundedCorners: boolean;
 }
 
-export const TOTAL_STEPS = 6;
+export const TOTAL_STEPS = 5;
 
 export const initialWizardState: WizardState = {
   step: 1,
