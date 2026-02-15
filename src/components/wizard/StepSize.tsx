@@ -1,9 +1,9 @@
 import { useState, useRef, useCallback } from "react";
-import { standardSizes, calcMetalPrice, calcAcrylicPrice, metalOptions } from "@/lib/pricing";
+import { standardSizes, calcMetalPrice, calcAcrylicPrice, metalOptions, bundles } from "@/lib/pricing";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, RectangleHorizontal, RectangleVertical, Sparkles, Shield, Gem, Check, RotateCw, ZoomIn, ZoomOut, Move } from "lucide-react";
+import { ArrowRight, ArrowLeft, RectangleHorizontal, RectangleVertical, Sparkles, Shield, Gem, Check, RotateCw, ZoomIn, ZoomOut, Move, Package, Percent } from "lucide-react";
 import luxuryWall from "@/assets/luxury-wall.jpg";
 import credenzaBackdrop from "@/assets/credenza-backdrop.jpg";
 import acrylicImg from "@/assets/acrylic-print.jpg";
@@ -190,7 +190,42 @@ const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onN
         );
       })}
 
-      {/* Material selection */}
+      {/* Bundle recommendations for selected size */}
+      {(() => {
+        const matchingBundles = bundles.filter((b) =>
+          b.prints.some((p) => p.w === selected.w && p.h === selected.h)
+        );
+        if (matchingBundles.length === 0) return null;
+        return (
+          <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Package className="w-4 h-4 text-primary" />
+              <h3 className="text-[10px] font-body font-semibold tracking-[0.2em] uppercase text-primary">
+                Save with a Bundle
+              </h3>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {matchingBundles.map((bundle) => (
+                <div
+                  key={bundle.id}
+                  className="shrink-0 bg-card border border-border rounded-lg p-3 min-w-[200px] max-w-[240px]"
+                >
+                  <p className="text-xs font-display font-bold text-foreground">{bundle.name}</p>
+                  <p className="text-[9px] text-muted-foreground font-body mt-0.5">{bundle.description}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-sm font-display font-bold text-gradient-gold">${bundle.salePrice}</span>
+                    <span className="text-[10px] text-muted-foreground font-body line-through">${bundle.originalPrice}</span>
+                    <Badge variant="outline" className="border-primary/30 text-primary text-[8px] uppercase tracking-wider px-1.5 py-0">
+                      <Percent className="w-2.5 h-2.5 mr-0.5" />{bundle.discount} off
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       <div>
         <h3 className="text-[10px] font-body font-semibold tracking-[0.2em] uppercase text-primary mb-1.5">
           Choose Your Medium
