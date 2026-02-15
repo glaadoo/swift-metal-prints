@@ -1,7 +1,8 @@
 import { standardSizes, calcMetalPrice, metalOptions } from "@/lib/pricing";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
+import roomBackdrop from "@/assets/room-backdrop.jpg";
 
 interface Props {
   imageUrl: string;
@@ -19,9 +20,16 @@ const sizeGroups = [
   { label: "Grand Scale", range: [16, 21] as const },
 ];
 
+// The backdrop represents roughly a 120" wide × 80" tall wall view
+const WALL_WIDTH_IN = 120;
+const WALL_HEIGHT_IN = 80;
+
 const StepSize = ({ imageUrl, sizeIdx, onSelect, onNext, onBack }: Props) => {
   const selected = standardSizes[sizeIdx];
-  const maxDim = 96; // largest dimension for scaling
+
+  // Calculate print size as percentage of the wall
+  const printWidthPct = (selected.w / WALL_WIDTH_IN) * 100;
+  const printHeightPct = (selected.h / WALL_HEIGHT_IN) * 100;
 
   return (
     <div className="space-y-5">
@@ -30,26 +38,33 @@ const StepSize = ({ imageUrl, sizeIdx, onSelect, onNext, onBack }: Props) => {
           Choose Your Size
         </h2>
         <p className="text-muted-foreground font-body mt-2 tracking-wide text-sm">
-          Tap any size to preview your art at that dimension.
+          Tap any size to preview your art at real-world scale.
         </p>
       </div>
 
-      {/* Compact preview */}
+      {/* Room mockup preview */}
       <div className="flex justify-center">
-        <div className="relative bg-secondary/30 border border-border rounded-lg p-6 flex items-center justify-center" style={{ width: "100%", maxWidth: 400, minHeight: 220 }}>
-          <div className="absolute top-2 right-2 bg-card/80 backdrop-blur-sm border border-border rounded px-2 py-0.5">
-            <span className="text-xs font-body text-primary font-semibold">{selected.label}</span>
-            <span className="text-[9px] text-muted-foreground font-body ml-1">{selected.w * selected.h} sq in</span>
-          </div>
+        <div className="relative w-full overflow-hidden rounded-lg border border-border" style={{ maxWidth: 520, aspectRatio: "16/9" }}>
+          <img
+            src={roomBackdrop}
+            alt="Room scene"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          {/* Print overlay — centered on wall above couch */}
           <div
-            className="overflow-hidden rounded shadow-2xl transition-all duration-500 ease-out"
+            className="absolute left-1/2 -translate-x-1/2 shadow-2xl transition-all duration-500 ease-out overflow-hidden"
             style={{
-              width: `${Math.max((selected.w / maxDim) * 100, 18)}%`,
-              aspectRatio: `${selected.w} / ${selected.h}`,
-              maxHeight: 190,
+              width: `${Math.max(printWidthPct, 8)}%`,
+              height: `${Math.max(printHeightPct, 8)}%`,
+              top: `${Math.max(5, 35 - printHeightPct / 2)}%`,
             }}
           >
             <img src={imageUrl} alt="Print preview" className="w-full h-full object-cover" />
+          </div>
+          {/* Size label badge */}
+          <div className="absolute bottom-2 right-2 bg-card/80 backdrop-blur-sm border border-border rounded px-2 py-0.5">
+            <span className="text-xs font-body text-primary font-semibold">{selected.label}</span>
+            <span className="text-[9px] text-muted-foreground font-body ml-1">{selected.w * selected.h} sq in</span>
           </div>
         </div>
       </div>
