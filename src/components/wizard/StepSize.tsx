@@ -86,7 +86,7 @@ const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onN
       <div className="flex justify-center">
         <div
           className="relative w-full overflow-hidden rounded-lg border-2 border-border bg-secondary cursor-grab active:cursor-grabbing"
-          style={{ maxWidth: 520, aspectRatio: `${displayW} / ${displayH}`, maxHeight: 360 }}
+          style={{ maxWidth: 520, aspectRatio: `${displayW} / ${displayH}` }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
