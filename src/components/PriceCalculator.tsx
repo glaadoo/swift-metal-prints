@@ -39,6 +39,18 @@ const PriceCalculator = () => {
   const [standOffQty, setStandOffQty] = useState(4);
   const [shippingSpeed, setShippingSpeed] = useState<ShippingSpeed>("standard");
 
+  // Listen for size selection from ShopBySize
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.sizeIdx !== undefined) {
+        setSizeIdx(detail.sizeIdx);
+      }
+    };
+    window.addEventListener("select-size", handler);
+    return () => window.removeEventListener("select-size", handler);
+  }, []);
+
   const isCustom = sizeIdx === "custom";
   const w = isCustom ? customW : standardSizes[sizeIdx as number].w;
   const h = isCustom ? customH : standardSizes[sizeIdx as number].h;
