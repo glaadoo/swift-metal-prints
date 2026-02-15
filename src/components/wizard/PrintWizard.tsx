@@ -152,6 +152,7 @@ const PrintWizard = ({ onStepChange }: Props) => {
           <StepReview
             state={state}
             onBack={prevStep}
+            onAddAnother={() => setState({ ...initialWizardState, step: 1 })}
           />
         )}
       </div>

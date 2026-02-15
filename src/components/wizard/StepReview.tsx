@@ -8,12 +8,13 @@ import {
 } from "@/lib/pricing";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ShoppingBag } from "lucide-react";
+import { ArrowLeft, ShoppingBag, Plus } from "lucide-react";
 import type { WizardState, MaterialChoice } from "./types";
 
 interface Props {
   state: WizardState;
   onBack: () => void;
+  onAddAnother: () => void;
 }
 
 function getMaterialLabel(m: MaterialChoice): string {
@@ -33,7 +34,7 @@ function calcPrintPrice(material: MaterialChoice, w: number, h: number, doubleSi
   return calcMetalPrice(w, h, metalOptions[idx]);
 }
 
-const StepReview = ({ state, onBack }: Props) => {
+const StepReview = ({ state, onBack, onAddAnother }: Props) => {
   const size = standardSizes[state.sizeIdx];
   const imageUrl = state.uploadedFile || state.image?.url || "";
   const backUrl = state.backUploadedFile || state.backImage?.url;
@@ -141,13 +142,18 @@ const StepReview = ({ state, onBack }: Props) => {
         </div>
       </Card>
 
-      <div className="flex justify-between pt-4">
+      <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4">
         <Button variant="outline" onClick={onBack} className="font-body gap-2">
           <ArrowLeft className="w-4 h-4" /> Back
         </Button>
-        <Button className="bg-gradient-gold text-primary-foreground font-body font-semibold hover:opacity-90 gap-2 h-14 px-10 text-sm tracking-[0.15em]">
-          <ShoppingBag className="w-4 h-4" /> PLACE ORDER
-        </Button>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={onAddAnother} className="font-body gap-2 border-primary/40 text-primary hover:bg-primary/10">
+            <Plus className="w-4 h-4" /> Add Another Print
+          </Button>
+          <Button className="bg-gradient-gold text-primary-foreground font-body font-semibold hover:opacity-90 gap-2 h-14 px-10 text-sm tracking-[0.15em]">
+            <ShoppingBag className="w-4 h-4" /> CHECKOUT
+          </Button>
+        </div>
       </div>
     </div>
   );
