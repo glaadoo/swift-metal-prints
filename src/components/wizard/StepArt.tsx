@@ -183,16 +183,18 @@ const StepArt = ({ image, uploadedFile, onSelect, onUpload, onNext }: Props) => 
 
       {/* Selected preview + continue */}
       {hasSelection && (
-        <div className="bg-card border border-primary/30 rounded-lg p-6 flex flex-col sm:flex-row items-center gap-6">
-          <img src={previewUrl} alt="Selected" className="w-28 h-20 object-cover rounded" />
-          <div className="flex-1 text-center sm:text-left">
-            <p className="text-foreground font-display font-semibold text-lg">Your Artwork</p>
-            {image && <p className="text-sm text-muted-foreground font-body">By {image.photographer}</p>}
-            {uploadedFile && <p className="text-sm text-muted-foreground font-body">Your uploaded image</p>}
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border p-4">
+          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center gap-4">
+            <img src={previewUrl} alt="Selected" className="w-20 h-14 object-cover rounded" />
+            <div className="flex-1 text-center sm:text-left">
+              <p className="text-foreground font-display font-semibold">Your Artwork</p>
+              {image && <p className="text-xs text-muted-foreground font-body">By {image.photographer}</p>}
+              {uploadedFile && <p className="text-xs text-muted-foreground font-body">Your uploaded image</p>}
+            </div>
+            <Button onClick={onNext} className="bg-gradient-gold text-primary-foreground font-body font-semibold hover:opacity-90 gap-2 h-12 px-8">
+              Choose Size <ArrowRight className="w-4 h-4" />
+            </Button>
           </div>
-          <Button onClick={onNext} className="bg-gradient-gold text-primary-foreground font-body font-semibold hover:opacity-90 gap-2">
-            Choose Size <ArrowRight className="w-4 h-4" />
-          </Button>
         </div>
       )}
 
