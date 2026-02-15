@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, ArrowLeft, RectangleHorizontal, RectangleVertical, Sparkles, Shield, Gem, Check, RotateCw, ZoomIn, ZoomOut, Move, Package, Percent } from "lucide-react";
 import luxuryWall from "@/assets/luxury-wall.jpg";
-import credenzaBackdrop from "@/assets/credenza-backdrop.jpg";
+import shelfBackdrop from "@/assets/shelf-backdrop.jpg";
 import acrylicImg from "@/assets/acrylic-print.jpg";
 import metalImg from "@/assets/metal-print.jpg";
 import metalMuseumImg from "@/assets/metal-museum-print.jpg";
@@ -90,29 +90,30 @@ const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onN
       <div className="flex justify-center">
         {(() => {
           const isDesk = sizeIdx < 4;
-          const backdropImg = isDesk ? credenzaBackdrop : luxuryWall;
-          // Credenza is ~60" wide in real life; wall scene ~120"
-          const WALL_W = isDesk ? 42 : 120;
+          const backdropImg = isDesk ? shelfBackdrop : luxuryWall;
+          // Shelf scene ~36" wide; wall scene ~120"
+          const WALL_W = isDesk ? 36 : 120;
           const containerAspect = isDesk ? "1/1" : "16/9";
           const containerRatio = isDesk ? 1 : 16 / 9;
-          // Scale print width relative to wall width
+          // Scale print width relative to scene width
           const printWPct = Math.max((displayW / WALL_W) * 100, 10);
           // Derive height from width using print's true aspect ratio, adjusted for container shape
           const printAspect = displayW / displayH;
           const printHPct = (printWPct / printAspect) * containerRatio;
-          // Desk prints sit just above credenza surface
-          const printTop = isDesk ? "30%" : "50%";
+          // Desk prints sit just above shelf surface (~63% down); wall prints centered
+          const printBottom = isDesk ? "38%" : undefined;
+          const printTop = isDesk ? undefined : "50%";
           return (
         <div className="relative w-full overflow-hidden rounded-lg border border-border" style={{ maxWidth: 720, aspectRatio: containerAspect }}>
           <img src={backdropImg} alt="Room backdrop" className="absolute inset-0 w-full h-full object-cover" />
           {/* Print — sized proportionally with correct aspect ratio */}
               <div
-                className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[0_4px_30px_rgba(0,0,0,0.3)] transition-all duration-500 ease-out overflow-hidden cursor-grab active:cursor-grabbing"
+                className={`absolute left-1/2 -translate-x-1/2 shadow-[0_4px_30px_rgba(0,0,0,0.3)] transition-all duration-500 ease-out overflow-hidden cursor-grab active:cursor-grabbing ${printTop ? '-translate-y-1/2' : ''}`}
                 style={{
                   width: `${printWPct}%`,
                   paddingBottom: `${printWPct / printAspect}%`,
                   height: 0,
-                  top: printTop,
+                  ...(printTop ? { top: printTop } : { bottom: printBottom }),
                 }}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
