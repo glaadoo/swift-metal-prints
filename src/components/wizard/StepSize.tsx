@@ -430,18 +430,6 @@ const StepSize = ({ imageUrl, sizeIdx, material, companionPrint, onSelect, onSel
                       <Check className="w-3 h-3 text-primary-foreground" />
                     </div>
                   )}
-                  {mat.id.startsWith("metal") && (() => {
-                    const singleIdx = mat.id === "metal-designer" ? 0 : 2;
-                    const doubleIdx = mat.id === "metal-designer" ? 1 : 3;
-                    const upsellCost = calcMetalPrice(size.w, size.h, metalOptions[doubleIdx]) - calcMetalPrice(size.w, size.h, metalOptions[singleIdx]);
-                    return (
-                      <div className="absolute bottom-1 left-1 right-1">
-                        <Badge className="bg-gradient-gold text-primary-foreground border-0 font-body text-[8px] gap-0.5 px-1.5 py-0.5">
-                          <RotateCw className="w-2.5 h-2.5" /> Add 2nd image +${upsellCost}
-                        </Badge>
-                      </div>
-                    );
-                  })()}
                 </div>
                 <div className="p-2 text-center">
                   <div className="flex items-center justify-center gap-1 text-primary">
