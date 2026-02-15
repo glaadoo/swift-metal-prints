@@ -106,10 +106,10 @@ const PrintWizard = ({ onStepChange }: Props) => {
             imageUrl={imageUrl}
             sizeIdx={state.sizeIdx}
             material={state.material}
-            companionPrints={state.companionPrints}
+            companionPrint={state.companionPrint}
             onSelect={(idx) => update({ sizeIdx: idx })}
             onSelectMaterial={(m) => update({ material: m, doubleSided: false, backImage: null, backUploadedFile: null })}
-            onCompanionPrintsChange={(cps) => update({ companionPrints: cps })}
+            onCompanionChange={(cp) => update({ companionPrint: cp })}
             onNext={nextStep}
             onBack={prevStep}
           />

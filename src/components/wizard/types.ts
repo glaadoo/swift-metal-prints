@@ -26,8 +26,8 @@ export interface WizardState {
   standOff: StandOffChoice;
   standOffQty: number;
   roundedCorners: boolean;
-  // Companion prints for desk & shelf sizes
-  companionPrints: CompanionPrint[];
+  // Companion print for desk & shelf sizes
+  companionPrint: CompanionPrint | null;
 }
 
 export const TOTAL_STEPS = 5;
@@ -44,5 +44,5 @@ export const initialWizardState: WizardState = {
   standOff: "none",
   standOffQty: 4,
   roundedCorners: false,
-  companionPrints: [],
+  companionPrint: null,
 };
