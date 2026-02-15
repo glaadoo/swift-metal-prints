@@ -3,12 +3,11 @@ import { initialWizardState, TOTAL_STEPS, type WizardState, type MaterialChoice,
 import { recommendStandOffs, standardSizes } from "@/lib/pricing";
 import StepArt from "./StepArt";
 import StepSize from "./StepSize";
-import StepMaterial from "./StepMaterial";
 import StepUpsell from "./StepUpsell";
 import StepMounting from "./StepMounting";
 import StepReview from "./StepReview";
 
-const stepLabels = ["Artwork", "Size", "Material", "Personalize", "Finishing", "Review"];
+const stepLabels = ["Artwork", "Size & Material", "Personalize", "Finishing", "Review"];
 
 interface Props {
   onStepChange?: (step: number) => void;
@@ -32,22 +31,17 @@ const PrintWizard = ({ onStepChange }: Props) => {
   // Determine if upsell step applies (metal only)
   const isMetal = state.material.startsWith("metal");
 
-  // Step mapping: for acrylic, skip step 4 (upsell)
-  const getEffectiveStep = () => {
-    if (!isMetal && state.step === 4) return 5; // skip upsell for acrylic
-    return state.step;
-  };
-
+  // Step mapping: for acrylic, skip step 3 (upsell)
   const nextStep = () => {
     let next = state.step + 1;
-    if (!isMetal && next === 4) next = 5; // skip upsell for acrylic
+    if (!isMetal && next === 3) next = 4; // skip upsell for acrylic
     if (next > TOTAL_STEPS) next = TOTAL_STEPS;
     update({ step: next });
   };
 
   const prevStep = () => {
     let prev = state.step - 1;
-    if (!isMetal && prev === 4) prev = 3; // skip upsell going back for acrylic
+    if (!isMetal && prev === 3) prev = 2; // skip upsell going back for acrylic
     if (prev < 1) prev = 1;
     update({ step: prev });
   };
@@ -62,7 +56,7 @@ const PrintWizard = ({ onStepChange }: Props) => {
               const stepNum = i + 1;
               const isActive = state.step === stepNum;
               const isDone = state.step > stepNum;
-              const isSkipped = !isMetal && stepNum === 4;
+              const isSkipped = !isMetal && stepNum === 3;
 
               if (isSkipped) return null;
 
@@ -110,24 +104,15 @@ const PrintWizard = ({ onStepChange }: Props) => {
           <StepSize
             imageUrl={imageUrl}
             sizeIdx={state.sizeIdx}
-            onSelect={(idx) => update({ sizeIdx: idx })}
-            onNext={nextStep}
-            onBack={prevStep}
-          />
-        )}
-
-        {state.step === 3 && (
-          <StepMaterial
-            imageUrl={imageUrl}
-            sizeIdx={state.sizeIdx}
             material={state.material}
-            onSelect={(m) => update({ material: m, doubleSided: false, backImage: null, backUploadedFile: null })}
+            onSelect={(idx) => update({ sizeIdx: idx })}
+            onSelectMaterial={(m) => update({ material: m, doubleSided: false, backImage: null, backUploadedFile: null })}
             onNext={nextStep}
             onBack={prevStep}
           />
         )}
 
-        {state.step === 4 && isMetal && (
+        {state.step === 3 && isMetal && (
           <StepUpsell
             frontImage={imageUrl}
             backImage={state.backImage}
@@ -143,7 +128,7 @@ const PrintWizard = ({ onStepChange }: Props) => {
           />
         )}
 
-        {state.step === 5 && (
+        {state.step === 4 && (
           <StepMounting
             sizeIdx={state.sizeIdx}
             standOff={state.standOff}
@@ -160,7 +145,7 @@ const PrintWizard = ({ onStepChange }: Props) => {
           />
         )}
 
-        {state.step === 6 && (
+        {state.step === 5 && (
           <StepReview
             state={state}
             onBack={prevStep}
