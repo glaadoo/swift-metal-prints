@@ -414,8 +414,8 @@ const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onN
         );
       })}
 
-      {/* Material selection — hidden when bundle is active (bundles are metal .040") */}
-      {!isBundle && (
+      {/* Material selection */}
+      {(
         <div>
           <h3 className="text-[10px] font-body font-semibold tracking-[0.2em] uppercase text-primary mb-1.5">
             Choose Your Medium
