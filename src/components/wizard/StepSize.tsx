@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, ArrowLeft, RectangleHorizontal, RectangleVertical, Sparkles, Shield, Gem, Check, RotateCw, ZoomIn, ZoomOut, Move } from "lucide-react";
 import luxuryWall from "@/assets/luxury-wall.jpg";
+import credenzaBackdrop from "@/assets/credenza-backdrop.jpg";
 import acrylicImg from "@/assets/acrylic-print.jpg";
 import metalImg from "@/assets/metal-print.jpg";
 import metalMuseumImg from "@/assets/metal-museum-print.jpg";
@@ -85,20 +86,26 @@ const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onN
 
       {/* Wall backdrop with proportionally-sized print */}
       <div className="flex justify-center">
+        {(() => {
+          const isDesk = sizeIdx < 4;
+          const backdropImg = isDesk ? credenzaBackdrop : luxuryWall;
+          // Desk: credenza ~48" wide, Wall: ~120" wide
+          const WALL_W = isDesk ? 48 : 120;
+          const WALL_H = WALL_W * (9 / 16);
+          const printWPct = Math.max((displayW / WALL_W) * 100, 10);
+          const printHPct = Math.max((displayH / WALL_H) * 100, 10);
+          // Position print higher on credenza (above the furniture)
+          const printTop = isDesk ? "35%" : "50%";
+          return (
         <div className="relative w-full overflow-hidden rounded-lg border border-border" style={{ maxWidth: 720, aspectRatio: "16/9" }}>
-          <img src={luxuryWall} alt="Gallery wall" className="absolute inset-0 w-full h-full object-cover" />
-          {/* Print — sized proportionally to wall (wall ≈ 120" wide) */}
-          {(() => {
-            const WALL_W = 120;
-            const WALL_H = WALL_W * (9 / 16); // ~67.5"
-            const printWPct = Math.max((displayW / WALL_W) * 100, 10);
-            const printHPct = Math.max((displayH / WALL_H) * 100, 10);
-            return (
+          <img src={backdropImg} alt="Room backdrop" className="absolute inset-0 w-full h-full object-cover" />
+          {/* Print — sized proportionally */}
               <div
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[0_4px_30px_rgba(0,0,0,0.3)] transition-all duration-500 ease-out overflow-hidden cursor-grab active:cursor-grabbing"
+                className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[0_4px_30px_rgba(0,0,0,0.3)] transition-all duration-500 ease-out overflow-hidden cursor-grab active:cursor-grabbing"
                 style={{
                   width: `${printWPct}%`,
                   height: `${printHPct}%`,
+                  top: printTop,
                 }}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
@@ -115,40 +122,40 @@ const StepSize = ({ imageUrl, sizeIdx, material, onSelect, onSelectMaterial, onN
                   }}
                 />
               </div>
-            );
-          })()}
-          {/* Zoom controls */}
-          <div className="absolute top-2 right-2 flex flex-col gap-1">
-            <button onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.min(z + 0.25, 3)); setPan({ x: 0, y: 0 }); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom in">
-              <ZoomIn className="w-4 h-4" />
-            </button>
-            <button onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.max(z - 0.25, 1)); setPan({ x: 0, y: 0 }); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom out">
-              <ZoomOut className="w-4 h-4" />
-            </button>
-            {zoom > 1 && (
-              <button onClick={(e) => { e.stopPropagation(); setZoom(1); setPan({ x: 0, y: 0 }); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Reset">
-                <Move className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-          {/* Size label + orientation toggle */}
-          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-            <div className="bg-card/80 backdrop-blur-sm border border-border rounded px-2.5 py-1">
-              <span className="text-sm font-body text-primary font-semibold">{displayLabel}</span>
-              <span className="text-[10px] text-muted-foreground font-body ml-1.5">{selected.w * selected.h} sq in</span>
-            </div>
-            {!isSquare && (
-              <div className="flex bg-card/80 backdrop-blur-sm border border-border rounded overflow-hidden">
-                <button onClick={() => setOrientation("landscape")} className={`p-1.5 transition-colors ${orientation === "landscape" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`} title="Landscape">
-                  <RectangleHorizontal className="w-4 h-4" />
+              {/* Zoom controls */}
+              <div className="absolute top-2 right-2 flex flex-col gap-1">
+                <button onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.min(z + 0.25, 3)); setPan({ x: 0, y: 0 }); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom in">
+                  <ZoomIn className="w-4 h-4" />
                 </button>
-                <button onClick={() => setOrientation("portrait")} className={`p-1.5 transition-colors ${orientation === "portrait" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`} title="Portrait">
-                  <RectangleVertical className="w-4 h-4" />
+                <button onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.max(z - 0.25, 1)); setPan({ x: 0, y: 0 }); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom out">
+                  <ZoomOut className="w-4 h-4" />
                 </button>
+                {zoom > 1 && (
+                  <button onClick={(e) => { e.stopPropagation(); setZoom(1); setPan({ x: 0, y: 0 }); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Reset">
+                    <Move className="w-4 h-4" />
+                  </button>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+              {/* Size label + orientation toggle */}
+              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                <div className="bg-card/80 backdrop-blur-sm border border-border rounded px-2.5 py-1">
+                  <span className="text-sm font-body text-primary font-semibold">{displayLabel}</span>
+                  <span className="text-[10px] text-muted-foreground font-body ml-1.5">{selected.w * selected.h} sq in</span>
+                </div>
+                {!isSquare && (
+                  <div className="flex bg-card/80 backdrop-blur-sm border border-border rounded overflow-hidden">
+                    <button onClick={() => setOrientation("landscape")} className={`p-1.5 transition-colors ${orientation === "landscape" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`} title="Landscape">
+                      <RectangleHorizontal className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setOrientation("portrait")} className={`p-1.5 transition-colors ${orientation === "portrait" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`} title="Portrait">
+                      <RectangleVertical className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Size selection */}
