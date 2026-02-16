@@ -32,7 +32,7 @@ const slides = [
   {
     image: metalOffice,
     label: "Family Gallery Wall",
-    caption: "Frameless family photos on acrylic and metal with stand-off mounts create a deeply personal gallery wall.",
+    caption: "Frameless pet and travel photos on acrylic and metal with stand-off mounts above a modern sectional.",
   },
 ];
 
