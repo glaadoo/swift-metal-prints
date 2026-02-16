@@ -14,6 +14,10 @@ export interface AdditionalPrint {
   image: SelectedImage | null;
   uploadedFile: string | null;
   orientation: "landscape" | "portrait";
+  zoom: number;
+  panX: number;
+  panY: number;
+  rotation: number;
 }
 
 export interface CartItem {
