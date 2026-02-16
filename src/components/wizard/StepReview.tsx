@@ -47,12 +47,13 @@ function getLineItems(item: CartItem | WizardState): LineItem[] {
   const size = resolveSize(item.sizeIdx, item.customWidth, item.customHeight);
   const lines: LineItem[] = [];
 
-  // Print
+  // Print (with quantity)
+  const qty = item.quantity || 1;
   const printPrice = calcPrintPrice(item.material, size.w, size.h, item.doubleSided);
   lines.push({
     label: getMaterialLabel(item.material),
-    detail: `${size.label}${item.doubleSided ? " — Double-Sided" : ""}`,
-    amount: printPrice,
+    detail: `${size.label}${item.doubleSided ? " — Double-Sided" : ""}${qty > 1 ? ` × ${qty}` : ""}`,
+    amount: printPrice * qty,
   });
 
   // Companion print

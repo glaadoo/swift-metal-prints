@@ -22,6 +22,7 @@ interface Props {
   sizeIdx: number;
   customWidth: number;
   customHeight: number;
+  quantity: number;
   material: MaterialChoice;
   companionPrint: CompanionPrint | null;
   imageNaturalWidth: number;
@@ -32,6 +33,7 @@ interface Props {
   panY: number;
   onSelect: (idx: number) => void;
   onCustomSize: (w: number, h: number) => void;
+  onQuantity: (q: number) => void;
   onSelectMaterial: (m: MaterialChoice) => void;
   onCompanionChange: (cp: CompanionPrint | null) => void;
   onRotate: (r: number) => void;
@@ -57,7 +59,7 @@ const sizeGroups = [
 // Desk & shelf size indices
 const DESK_SHELF_MAX_IDX = 4;
 
-const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, material, companionPrint, imageNaturalWidth, imageNaturalHeight, rotation, zoom, panX, panY, onSelect, onCustomSize, onSelectMaterial, onCompanionChange, onRotate, onZoom, onPan, onNext, onBack }: Props) => {
+const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, material, companionPrint, imageNaturalWidth, imageNaturalHeight, rotation, zoom, panX, panY, onSelect, onCustomSize, onQuantity, onSelectMaterial, onCompanionChange, onRotate, onZoom, onPan, onNext, onBack }: Props) => {
   const isCustom = sizeIdx === CUSTOM_SIZE_IDX;
   const selected = isCustom ? { label: `${customWidth}"×${customHeight}"`, w: customWidth, h: customHeight } : standardSizes[sizeIdx];
   const [orientation, setOrientation] = useState<"landscape" | "portrait">("landscape");
@@ -307,6 +309,8 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, material, comp
           {/* Size selection */}
           {sizeGroups.map((group) => {
             const items = standardSizes.slice(group.range[0], group.range[1]);
+            const groupHasSelection = !isCustom && sizeIdx >= group.range[0] && sizeIdx < group.range[1];
+            const isSmallGroup = group.range[1] <= 10; // Desk & Shelf or Wall Art
 
             return (
               <div key={group.label}>
@@ -337,6 +341,31 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, material, comp
                     );
                   })}
                 </div>
+                {/* Inline quantity picker when a size in this group is selected */}
+                {groupHasSelection && isSmallGroup && (
+                  <div className="mt-2 flex items-center gap-2 bg-primary/5 border border-primary/20 rounded-lg px-3 py-2">
+                    <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="text-xs font-body text-foreground font-semibold whitespace-nowrap">
+                      {group.range[1] <= 4 ? "Great in sets!" : "Gallery wall?"}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground font-body hidden sm:inline">Qty:</span>
+                    <div className="flex items-center gap-0.5 ml-auto">
+                      {[1, 2, 3, 4, 5, 6].map((q) => (
+                        <button
+                          key={q}
+                          onClick={() => onQuantity(q)}
+                          className={`w-7 h-7 rounded-md text-xs font-body font-bold transition-all ${
+                            quantity === q
+                              ? "bg-gradient-gold text-primary-foreground shadow-sm"
+                              : "bg-secondary text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                          }`}
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -387,54 +416,7 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, material, comp
             </div>
           </div>
 
-          {/* Bundle / Add Another prompt for smaller sizes */}
-          {sizeIdx < 10 && (
-            <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 flex items-center justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-display font-bold text-foreground">
-                  {sizeIdx < DESK_SHELF_MAX_IDX ? "Pair it — desk prints look great in sets!" : "Add a matching piece for a gallery wall"}
-                </p>
-                <p className="text-[10px] text-muted-foreground font-body mt-0.5">
-                  {sizeIdx < DESK_SHELF_MAX_IDX
-                    ? "Add a companion print at the same size right next to it."
-                    : "Create a stunning arrangement with multiple sizes."}
-                </p>
-              </div>
-              {sizeIdx < DESK_SHELF_MAX_IDX ? (
-                !hasCompanion ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="shrink-0 border-primary/40 text-primary hover:bg-primary/10 gap-1.5"
-                    onClick={addCompanion}
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span className="text-xs font-body">Add Print</span>
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="shrink-0 text-destructive hover:bg-destructive/10 gap-1"
-                    onClick={removeCompanion}
-                  >
-                    <X className="w-3.5 h-3.5" />
-                    <span className="text-xs font-body">Remove</span>
-                  </Button>
-                )
-              ) : (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="shrink-0 border-primary/40 text-primary hover:bg-primary/10 gap-1.5"
-                  onClick={addCompanion}
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span className="text-xs font-body">Add Print</span>
-                </Button>
-              )}
-            </div>
-          )}
+
 
           {/* Low quality warning */}
           {isLowQuality && (

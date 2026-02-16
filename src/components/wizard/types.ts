@@ -24,6 +24,7 @@ export interface CartItem {
   sizeIdx: number;
   customWidth: number;
   customHeight: number;
+  quantity: number;
   material: MaterialChoice;
   doubleSided: boolean;
   backImage: SelectedImage | null;
@@ -47,6 +48,7 @@ export interface WizardState {
   sizeIdx: number;
   customWidth: number;
   customHeight: number;
+  quantity: number;
   material: MaterialChoice;
   doubleSided: boolean;
   backImage: SelectedImage | null;
@@ -73,6 +75,7 @@ export const initialWizardState: WizardState = {
   sizeIdx: 0,
   customWidth: 12,
   customHeight: 16,
+  quantity: 1,
   material: "metal-designer",
   doubleSided: false,
   backImage: null,
