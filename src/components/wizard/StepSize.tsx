@@ -318,23 +318,20 @@ const StepSize = ({ imageUrl, sizeIdx, material, companionPrint, onSelect, onSel
 
       {/* Material selection — full width below the two-column grid */}
       <div>
-        <h3 className="text-xs font-body font-semibold tracking-[0.2em] uppercase text-primary mb-1.5">
+        <h3 className="text-xs font-body font-semibold tracking-[0.2em] uppercase text-primary mb-2">
           Choose Your Medium
         </h3>
-        <div className="grid grid-cols-3 gap-3">
-          {materialOpts.map((mat) => {
+        {/* Metal options row */}
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          {materialOpts.filter(m => m.id !== "acrylic").map((mat) => {
             const isSelected = material === mat.id;
             const size = standardSizes[sizeIdx];
-            const price = mat.id === "acrylic"
-              ? calcAcrylicPrice(size.w, size.h)
-              : mat.id === "metal-designer"
-                ? calcMetalPrice(size.w, size.h, metalOptions[0])
-                : calcMetalPrice(size.w, size.h, metalOptions[2]);
+            const price = mat.id === "metal-designer"
+              ? calcMetalPrice(size.w, size.h, metalOptions[0])
+              : calcMetalPrice(size.w, size.h, metalOptions[2]);
 
             const companionPrice = hasCompanion && companionSize
-              ? (mat.id === "acrylic"
-                ? calcAcrylicPrice(companionSize.w, companionSize.h)
-                : mat.id === "metal-designer"
+              ? (mat.id === "metal-designer"
                   ? calcMetalPrice(companionSize.w, companionSize.h, metalOptions[0])
                   : calcMetalPrice(companionSize.w, companionSize.h, metalOptions[2]))
               : 0;
@@ -360,29 +357,80 @@ const StepSize = ({ imageUrl, sizeIdx, material, companionPrint, onSelect, onSel
                     <img src={mat.cornerImg} alt={`${mat.label} corner detail`} className="w-full h-full object-cover" />
                   </div>
                 </div>
-                <div className="p-2">
-                  <div className="flex items-center justify-center gap-1 text-primary">
+                <div className="p-3">
+                  <div className="flex items-center justify-center gap-1.5 text-primary">
                     {mat.icon}
-                    <span className="text-xs font-display font-bold text-foreground">{mat.label}</span>
+                    <span className="text-sm font-display font-bold text-foreground">{mat.label}</span>
                   </div>
-                  <p className="text-[10px] text-muted-foreground font-body text-center">{mat.subtitle}</p>
-                  <ul className="mt-1.5 space-y-0.5">
+                  <p className="text-xs text-muted-foreground font-body text-center">{mat.subtitle}</p>
+                  <ul className="mt-2 space-y-1">
                     {mat.benefits.map((b) => (
-                      <li key={b} className="flex items-start gap-1 text-[10px] text-muted-foreground font-body">
-                        <Check className="w-3 h-3 text-primary shrink-0 mt-[1px]" />
+                      <li key={b} className="flex items-start gap-1.5 text-xs text-muted-foreground font-body">
+                        <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-[1px]" />
                         <span>{b}</span>
                       </li>
                     ))}
                   </ul>
-                  <p className="text-sm font-display font-bold text-gradient-gold mt-1.5 text-center">
+                  <p className="text-base font-display font-bold text-gradient-gold mt-2 text-center">
                     ${totalPrice}
-                    {hasCompanion && <span className="text-[10px] text-muted-foreground font-body ml-1">(2 prints)</span>}
+                    {hasCompanion && <span className="text-xs text-muted-foreground font-body ml-1">(2 prints)</span>}
                   </p>
                 </div>
               </Card>
             );
           })}
         </div>
+        {/* Acrylic option — full width */}
+        {(() => {
+          const mat = materialOpts.find(m => m.id === "acrylic")!;
+          const isSelected = material === mat.id;
+          const size = standardSizes[sizeIdx];
+          const price = calcAcrylicPrice(size.w, size.h);
+          const companionPrice = hasCompanion && companionSize ? calcAcrylicPrice(companionSize.w, companionSize.h) : 0;
+          const totalPrice = price + companionPrice;
+
+          return (
+            <Card
+              className={`overflow-hidden cursor-pointer transition-all duration-200 ${
+                isSelected ? "ring-2 ring-primary border-primary" : "border-border hover:border-primary/40"
+              }`}
+              onClick={() => onSelectMaterial(mat.id)}
+            >
+              <div className="grid grid-cols-[1fr_1.5fr]">
+                <div className="aspect-[4/3] relative overflow-hidden">
+                  <img src={mat.img} alt={mat.label} className="w-full h-full object-cover" />
+                  {isSelected && (
+                    <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                      <Check className="w-3 h-3 text-primary-foreground" />
+                    </div>
+                  )}
+                  <div className="absolute bottom-1 left-1 w-10 h-10 rounded border border-border/50 overflow-hidden shadow-md">
+                    <img src={mat.cornerImg} alt={`${mat.label} corner detail`} className="w-full h-full object-cover" />
+                  </div>
+                </div>
+                <div className="p-3 flex flex-col justify-center">
+                  <div className="flex items-center gap-1.5 text-primary">
+                    {mat.icon}
+                    <span className="text-sm font-display font-bold text-foreground">{mat.label}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground font-body">{mat.subtitle}</p>
+                  <ul className="mt-2 space-y-1">
+                    {mat.benefits.map((b) => (
+                      <li key={b} className="flex items-start gap-1.5 text-xs text-muted-foreground font-body">
+                        <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-[1px]" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-base font-display font-bold text-gradient-gold mt-2">
+                    ${totalPrice}
+                    {hasCompanion && <span className="text-xs text-muted-foreground font-body ml-1">(2 prints)</span>}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          );
+        })()}
       </div>
 
       {/* Navigation */}
