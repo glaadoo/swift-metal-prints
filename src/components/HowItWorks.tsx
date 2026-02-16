@@ -4,7 +4,7 @@ const steps = [
   {
     icon: Upload,
     step: "01",
-    title: "Submit Your Vision",
+    title: "Choose Your Image",
     description: "Upload any photograph. Our artisans review each submission and enhance for museum-grade reproduction.",
   },
   {
