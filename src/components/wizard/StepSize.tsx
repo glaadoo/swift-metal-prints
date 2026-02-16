@@ -145,11 +145,16 @@ const StepSize = ({ imageUrl, sizeIdx, material, companionPrint, onSelect, onSel
           const WALL_W = isDesk ? 24 : 96;
           const containerAspect = isDesk ? "3/4" : "16/9";
 
-          // Calculate main print dimensions
-          const printWPct = Math.max((displayW / WALL_W) * 100, 10);
+          // Calculate main print dimensions - cap to fit inside backdrop
+          const rawPrintWPct = Math.max((displayW / WALL_W) * 100, 10);
+          const printWPct = Math.min(rawPrintWPct, 75);
           const printAspect = displayW / displayH;
+          // Cap height: for 16:9 container, max ~55% height so it stays inside
+          const maxHeightPct = isDesk ? 45 : 55;
+          const heightPct = printWPct / printAspect * (isDesk ? 0.75 : (9 / 16));
+          const finalPrintWPct = heightPct > maxHeightPct ? printWPct * (maxHeightPct / heightPct) : printWPct;
           const printBottom = isDesk ? "38%" : undefined;
-          const printTop = isDesk ? undefined : "35%";
+          const printTop = isDesk ? undefined : "45%";
 
           // If companion exists and desk size, show side-by-side
           if (isDesk && hasCompanion) {
@@ -226,8 +231,8 @@ const StepSize = ({ imageUrl, sizeIdx, material, companionPrint, onSelect, onSel
               <div
                 className={`absolute left-1/2 -translate-x-1/2 shadow-[0_4px_30px_rgba(0,0,0,0.3)] transition-all duration-500 ease-out overflow-hidden cursor-grab active:cursor-grabbing ${printTop ? '-translate-y-1/2' : ''}`}
                 style={{
-                  width: `${printWPct}%`,
-                  paddingBottom: `${printWPct / printAspect}%`,
+                  width: `${finalPrintWPct}%`,
+                  paddingBottom: `${finalPrintWPct / printAspect}%`,
                   height: 0,
                   ...(printTop ? { top: printTop } : { bottom: printBottom }),
                 }}
