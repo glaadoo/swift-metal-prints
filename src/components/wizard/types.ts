@@ -14,12 +14,16 @@ export interface CompanionPrint {
   orientation: "landscape" | "portrait";
 }
 
+export const CUSTOM_SIZE_IDX = -1;
+
 export interface CartItem {
   image: SelectedImage | null;
   uploadedFile: string | null;
   imageNaturalWidth: number;
   imageNaturalHeight: number;
   sizeIdx: number;
+  customWidth: number;
+  customHeight: number;
   material: MaterialChoice;
   doubleSided: boolean;
   backImage: SelectedImage | null;
@@ -41,6 +45,8 @@ export interface WizardState {
   imageNaturalWidth: number;
   imageNaturalHeight: number;
   sizeIdx: number;
+  customWidth: number;
+  customHeight: number;
   material: MaterialChoice;
   doubleSided: boolean;
   backImage: SelectedImage | null;
@@ -50,7 +56,6 @@ export interface WizardState {
   roundedCorners: boolean;
   companionPrint: CompanionPrint | null;
   cart: CartItem[];
-  // Image adjustments
   rotation: number;
   zoom: number;
   panX: number;
@@ -66,6 +71,8 @@ export const initialWizardState: WizardState = {
   imageNaturalWidth: 0,
   imageNaturalHeight: 0,
   sizeIdx: 0,
+  customWidth: 12,
+  customHeight: 16,
   material: "metal-designer",
   doubleSided: false,
   backImage: null,

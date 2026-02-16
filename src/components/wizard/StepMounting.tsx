@@ -1,4 +1,5 @@
 import { standardSizes, addOns, recommendStandOffs } from "@/lib/pricing";
+import { resolveSize } from "@/lib/sizeHelpers";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,6 +11,8 @@ import blackImg from "@/assets/standoff-black.jpg";
 
 interface Props {
   sizeIdx: number;
+  customWidth: number;
+  customHeight: number;
   standOff: StandOffChoice;
   standOffQty: number;
   roundedCorners: boolean;
@@ -20,8 +23,8 @@ interface Props {
   onBack: () => void;
 }
 
-const StepMounting = ({ sizeIdx, standOff, standOffQty, roundedCorners, onStandOff, onStandOffQty, onRoundedCorners, onNext, onBack }: Props) => {
-  const size = standardSizes[sizeIdx];
+const StepMounting = ({ sizeIdx, customWidth, customHeight, standOff, standOffQty, roundedCorners, onStandOff, onStandOffQty, onRoundedCorners, onNext, onBack }: Props) => {
+  const size = resolveSize(sizeIdx, customWidth, customHeight);
   const qty = recommendStandOffs(size.w, size.h);
 
   const standOptions: { id: StandOffChoice; label: string; desc: string; img?: string }[] = [
