@@ -37,10 +37,7 @@ const StepArt = ({ image, uploadedFile, onUpload, onNext }: Props) => {
           </div>
           <div className="text-center">
             <p className="font-display font-bold text-xl text-foreground">Upload Your Photo</p>
-            <p className="font-body text-sm text-muted-foreground mt-1">JPG, PNG, TIFF — any resolution</p>
-            <p className="font-body text-xs text-muted-foreground/70 mt-3">
-              Photos from modern phones (12MP+) produce stunning prints up to 48×96″
-            </p>
+            <p className="font-body text-sm text-muted-foreground mt-1">JPG, PNG, TIFF</p>
           </div>
           <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
         </label>
