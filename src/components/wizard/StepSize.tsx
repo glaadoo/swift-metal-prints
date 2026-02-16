@@ -3,7 +3,7 @@ import { standardSizes, calcMetalPrice, calcAcrylicPrice, metalOptions } from "@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ArrowLeft, RectangleHorizontal, RectangleVertical, Sparkles, Shield, Gem, Check, RotateCw, ZoomIn, ZoomOut, Move, Plus, X, Upload, AlertTriangle } from "lucide-react";
+import { ArrowRight, ArrowLeft, RectangleHorizontal, RectangleVertical, Sparkles, Shield, Gem, Check, RotateCw, ZoomIn, ZoomOut, Move, Plus, X, Upload, AlertTriangle, Ruler } from "lucide-react";
 import couchWall from "@/assets/couch-wall.jpg";
 import shelfBackdrop from "@/assets/shelf-backdrop.jpg";
 import acrylicImg from "@/assets/acrylic-print.jpg";
@@ -13,10 +13,15 @@ import cornerLuxMetal from "@/assets/corner-lux-metal.jpg";
 import cornerDesignerMetal from "@/assets/corner-designer-metal.jpg";
 import cornerAcrylic from "@/assets/corner-acrylic.jpg";
 import type { MaterialChoice, CompanionPrint } from "./types";
+import { CUSTOM_SIZE_IDX } from "./types";
+import { Input } from "@/components/ui/input";
+
 
 interface Props {
   imageUrl: string;
   sizeIdx: number;
+  customWidth: number;
+  customHeight: number;
   material: MaterialChoice;
   companionPrint: CompanionPrint | null;
   imageNaturalWidth: number;
@@ -26,6 +31,7 @@ interface Props {
   panX: number;
   panY: number;
   onSelect: (idx: number) => void;
+  onCustomSize: (w: number, h: number) => void;
   onSelectMaterial: (m: MaterialChoice) => void;
   onCompanionChange: (cp: CompanionPrint | null) => void;
   onRotate: (r: number) => void;
@@ -51,8 +57,9 @@ const sizeGroups = [
 // Desk & shelf size indices
 const DESK_SHELF_MAX_IDX = 4;
 
-const StepSize = ({ imageUrl, sizeIdx, material, companionPrint, imageNaturalWidth, imageNaturalHeight, rotation, zoom, panX, panY, onSelect, onSelectMaterial, onCompanionChange, onRotate, onZoom, onPan, onNext, onBack }: Props) => {
-  const selected = standardSizes[sizeIdx];
+const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, material, companionPrint, imageNaturalWidth, imageNaturalHeight, rotation, zoom, panX, panY, onSelect, onCustomSize, onSelectMaterial, onCompanionChange, onRotate, onZoom, onPan, onNext, onBack }: Props) => {
+  const isCustom = sizeIdx === CUSTOM_SIZE_IDX;
+  const selected = isCustom ? { label: `${customWidth}"×${customHeight}"`, w: customWidth, h: customHeight } : standardSizes[sizeIdx];
   const [orientation, setOrientation] = useState<"landscape" | "portrait">("landscape");
   const isDragging = useRef(false);
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
@@ -99,7 +106,7 @@ const StepSize = ({ imageUrl, sizeIdx, material, companionPrint, imageNaturalWid
       ? `${Math.min(selected.w, selected.h)}"×${Math.max(selected.w, selected.h)}"`
       : `${Math.max(selected.w, selected.h)}"×${Math.min(selected.w, selected.h)}"`;
 
-  const isDesk = sizeIdx < DESK_SHELF_MAX_IDX;
+  const isDesk = !isCustom && sizeIdx >= 0 && sizeIdx < DESK_SHELF_MAX_IDX;
   const hasCompanion = !!companionPrint;
   const companionImgSrc = companionPrint?.uploadedFile || companionPrint?.image?.url || "";
 
@@ -333,6 +340,52 @@ const StepSize = ({ imageUrl, sizeIdx, material, companionPrint, imageNaturalWid
               </div>
             );
           })}
+
+          {/* Custom Size */}
+          <div>
+            <h3 className="text-xs font-body font-semibold tracking-[0.2em] uppercase text-primary mb-1.5">
+              Custom Size
+            </h3>
+            <div className="flex gap-1.5 items-center flex-wrap">
+              <Card
+                className={`px-2.5 py-1.5 text-center cursor-pointer transition-all duration-200 shrink-0 ${
+                  isCustom
+                    ? "ring-2 ring-primary border-primary bg-primary/5"
+                    : "border-border hover:border-primary/40"
+                }`}
+                onClick={() => onSelect(CUSTOM_SIZE_IDX)}
+              >
+                <div className="flex items-center gap-1.5">
+                  <Ruler className="w-3.5 h-3.5 text-primary" />
+                  <p className="text-xs font-display font-bold text-foreground leading-tight whitespace-nowrap">Custom</p>
+                </div>
+              </Card>
+              {isCustom && (
+                <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1">
+                    <Input
+                      type="number"
+                      min={4}
+                      max={96}
+                      value={customWidth}
+                      onChange={(e) => onCustomSize(Math.max(4, Math.min(96, Number(e.target.value) || 4)), customHeight)}
+                      className="w-16 h-7 text-xs text-center font-body"
+                    />
+                    <span className="text-xs text-muted-foreground font-body">×</span>
+                    <Input
+                      type="number"
+                      min={4}
+                      max={96}
+                      value={customHeight}
+                      onChange={(e) => onCustomSize(customWidth, Math.max(4, Math.min(96, Number(e.target.value) || 4)))}
+                      className="w-16 h-7 text-xs text-center font-body"
+                    />
+                    <span className="text-xs text-muted-foreground font-body">inches</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Bundle / Add Another prompt for smaller sizes */}
           {sizeIdx < 10 && (

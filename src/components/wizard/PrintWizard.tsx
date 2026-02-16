@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { initialWizardState, TOTAL_STEPS, type WizardState, type CartItem } from "./types";
-import { recommendStandOffs, standardSizes } from "@/lib/pricing";
+import { recommendStandOffs } from "@/lib/pricing";
+import { resolveSize } from "@/lib/sizeHelpers";
 import StepArt from "./StepArt";
 import StepSize from "./StepSize";
 import StepUpsell from "./StepUpsell";
@@ -123,7 +124,10 @@ const PrintWizard = ({ onStepChange }: Props) => {
             zoom={state.zoom}
             panX={state.panX}
             panY={state.panY}
+            customWidth={state.customWidth}
+            customHeight={state.customHeight}
             onSelect={(idx) => update({ sizeIdx: idx })}
+            onCustomSize={(w, h) => update({ customWidth: w, customHeight: h })}
             onSelectMaterial={(m) => update({ material: m, doubleSided: false, backImage: null, backUploadedFile: null })}
             onCompanionChange={(cp) => update({ companionPrint: cp })}
             onRotate={(r) => update({ rotation: r })}
@@ -153,11 +157,13 @@ const PrintWizard = ({ onStepChange }: Props) => {
         {state.step === 4 && (
           <StepMounting
             sizeIdx={state.sizeIdx}
+            customWidth={state.customWidth}
+            customHeight={state.customHeight}
             standOff={state.standOff}
             standOffQty={state.standOffQty}
             roundedCorners={state.roundedCorners}
             onStandOff={(v) => {
-              const size = standardSizes[state.sizeIdx];
+              const size = resolveSize(state.sizeIdx, state.customWidth, state.customHeight);
               update({ standOff: v, standOffQty: v !== "none" ? recommendStandOffs(size.w, size.h) : state.standOffQty });
             }}
             onStandOffQty={(v) => update({ standOffQty: v })}
@@ -178,6 +184,8 @@ const PrintWizard = ({ onStepChange }: Props) => {
                 imageNaturalWidth: state.imageNaturalWidth,
                 imageNaturalHeight: state.imageNaturalHeight,
                 sizeIdx: state.sizeIdx,
+                customWidth: state.customWidth,
+                customHeight: state.customHeight,
                 material: state.material,
                 doubleSided: state.doubleSided,
                 backImage: state.backImage,

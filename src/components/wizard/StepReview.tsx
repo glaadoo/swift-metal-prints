@@ -6,6 +6,7 @@ import {
   addOns,
   getShippingCost,
 } from "@/lib/pricing";
+import { resolveSize } from "@/lib/sizeHelpers";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ShoppingBag, Plus } from "lucide-react";
@@ -43,7 +44,7 @@ interface LineItem {
 }
 
 function getLineItems(item: CartItem | WizardState): LineItem[] {
-  const size = standardSizes[item.sizeIdx];
+  const size = resolveSize(item.sizeIdx, item.customWidth, item.customHeight);
   const lines: LineItem[] = [];
 
   // Print
