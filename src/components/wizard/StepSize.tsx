@@ -66,6 +66,7 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
   const isDragging = useRef(false);
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const [pickerSlot, setPickerSlot] = useState<number | null>(null);
+  const [activePrintIdx, setActivePrintIdx] = useState(0); // 0 = primary, 1+ = additional
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     isDragging.current = true;
@@ -212,17 +213,35 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
                 <div className="relative w-full overflow-hidden rounded-lg border border-border" style={{ aspectRatio: containerAspect }}>
                   <img src={backdropImg} alt="Room backdrop" className="absolute inset-0 w-full h-full object-cover" />
                   <div className="absolute left-1/2 -translate-x-1/2 flex items-end" style={{ bottom: isDesk ? "38%" : "30%", gap: `${gapPct}%` }}>
-                    <div className="shadow-[0_4px_20px_rgba(0,0,0,0.3)] overflow-hidden shrink-0" style={{ width: `${perPrintPct}%`, aspectRatio: `${printAspect}` }}>
-                      <img src={imageUrl} alt="Print 1" className="w-full h-full object-cover" style={{ transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px) rotate(${rotation}deg)`, transformOrigin: "center center" }} />
+                    {/* Primary print */}
+                    <div
+                      className={`shadow-[0_4px_20px_rgba(0,0,0,0.3)] overflow-hidden shrink-0 cursor-pointer transition-all ${activePrintIdx === 0 ? "ring-2 ring-primary ring-offset-1" : "hover:ring-1 hover:ring-primary/40"}`}
+                      style={{ width: `${perPrintPct}%`, aspectRatio: `${printAspect}` }}
+                      onClick={() => setActivePrintIdx(0)}
+                      onPointerDown={activePrintIdx === 0 ? handlePointerDown : undefined}
+                      onPointerMove={activePrintIdx === 0 ? handlePointerMove : undefined}
+                      onPointerUp={activePrintIdx === 0 ? handlePointerUp : undefined}
+                    >
+                      <img src={imageUrl} alt="Print 1" className="w-full h-full object-cover select-none pointer-events-none" draggable={false} style={{ transform: `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px) rotate(${rotation}deg)`, transformOrigin: "center center" }} />
                     </div>
+                    {/* Additional prints */}
                     {Array.from({ length: quantity - 1 }).map((_, idx) => {
                       const slotImg = getSlotImg(idx);
                       const slotOri = additionalPrints[idx]?.orientation || "landscape";
                       const slotW = slotOri === "portrait" ? Math.min(selected.w, selected.h) : Math.max(selected.w, selected.h);
                       const slotH = slotOri === "portrait" ? Math.max(selected.w, selected.h) : Math.min(selected.w, selected.h);
                       const slotAspect = slotW / slotH;
+                      const isActive = activePrintIdx === idx + 1;
                       return (
-                        <div key={idx} className="shadow-[0_4px_20px_rgba(0,0,0,0.3)] overflow-hidden shrink-0 bg-muted/50 cursor-pointer" style={{ width: `${perPrintPct}%`, aspectRatio: `${slotAspect}` }} onClick={() => setPickerSlot(idx)}>
+                        <div
+                          key={idx}
+                          className={`shadow-[0_4px_20px_rgba(0,0,0,0.3)] overflow-hidden shrink-0 cursor-pointer transition-all ${isActive ? "ring-2 ring-primary ring-offset-1" : "hover:ring-1 hover:ring-primary/40"} ${!slotImg ? "bg-muted/50" : ""}`}
+                          style={{ width: `${perPrintPct}%`, aspectRatio: `${slotAspect}` }}
+                          onClick={() => {
+                            setActivePrintIdx(idx + 1);
+                            if (!slotImg) setPickerSlot(idx);
+                          }}
+                        >
                           {slotImg ? (
                             <img src={slotImg} alt={`Print ${idx + 2}`} className="w-full h-full object-cover" />
                           ) : (
@@ -235,9 +254,23 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
                       );
                     })}
                   </div>
+                  {/* Image tools for active print */}
+                  <div className="absolute top-2 right-2 flex flex-col gap-1">
+                    {activePrintIdx === 0 ? (
+                      <>
+                        <button onClick={(e) => { e.stopPropagation(); onZoom(Math.min(zoom + 0.25, 3)); onPan(0, 0); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
+                        <button onClick={(e) => { e.stopPropagation(); onZoom(Math.max(zoom - 0.25, 1)); onPan(0, 0); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom out"><ZoomOut className="w-4 h-4" /></button>
+                        <button onClick={(e) => { e.stopPropagation(); onRotate((rotation + 90) % 360); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Rotate"><RotateCw className="w-4 h-4" /></button>
+                      </>
+                    ) : (
+                      <button onClick={(e) => { e.stopPropagation(); setPickerSlot(activePrintIdx - 1); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Change image"><Upload className="w-4 h-4" /></button>
+                    )}
+                  </div>
+                  {/* Active print label */}
                   <div className="absolute bottom-2 left-2 bg-card/80 backdrop-blur-sm border border-border rounded px-2.5 py-1">
                     <span className="text-sm font-body text-primary font-semibold">{displayLabel}</span>
                     <span className="text-[10px] text-muted-foreground font-body ml-1">× {quantity}</span>
+                    <span className="text-[10px] text-primary/70 font-body ml-2">Print {activePrintIdx + 1} selected</span>
                   </div>
                 </div>
               );
