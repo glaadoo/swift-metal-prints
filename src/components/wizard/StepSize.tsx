@@ -262,7 +262,7 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
                       onPointerMove={activePrintIdx === 0 ? handlePointerMove : undefined}
                       onPointerUp={activePrintIdx === 0 ? handlePointerUp : undefined}
                     >
-                      <img src={imageUrl} alt="Print 1" className="w-full h-full object-cover select-none pointer-events-none" draggable={false} style={{ transform: buildTransform(zoom, panX, panY, rotation, printAspect), transformOrigin: "center center" }} />
+                      <img src={imageUrl} alt="Print 1" className="w-full h-full object-contain select-none pointer-events-none bg-black" draggable={false} style={{ transform: buildTransform(zoom, panX, panY, rotation, printAspect), transformOrigin: "center center" }} />
                     </div>
                     {/* Additional prints */}
                     {Array.from({ length: quantity - 1 }).map((_, idx) => {
@@ -291,7 +291,7 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
                           onPointerUp={isActive && slotImg ? handlePointerUp : undefined}
                         >
                           {slotImg ? (
-                            <img src={slotImg} alt={`Print ${idx + 2}`} className="w-full h-full object-cover select-none pointer-events-none" draggable={false} style={{ transform: buildTransform(apZoom, apPanX, apPanY, apRotation, slotAspect), transformOrigin: "center center" }} />
+                            <img src={slotImg} alt={`Print ${idx + 2}`} className="w-full h-full object-contain select-none pointer-events-none bg-black" draggable={false} style={{ transform: buildTransform(apZoom, apPanX, apPanY, apRotation, slotAspect), transformOrigin: "center center" }} />
                           ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center gap-1 hover:bg-muted/70 transition-colors">
                               <Plus className="w-5 h-5 text-muted-foreground" />
@@ -347,7 +347,7 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
                   onPointerMove={handlePointerMove}
                   onPointerUp={handlePointerUp}
                 >
-                  <img src={imageUrl} alt="Print preview" className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none" draggable={false} style={{ transform: buildTransform(zoom, panX, panY, rotation, printAspect), transformOrigin: "center center" }} />
+                  <img src={imageUrl} alt="Print preview" className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none bg-black" draggable={false} style={{ transform: buildTransform(zoom, panX, panY, rotation, printAspect), transformOrigin: "center center" }} />
                 </div>
                 <div className="absolute top-2 right-2 flex flex-col gap-1">
                   <button onClick={(e) => { e.stopPropagation(); onZoom(Math.min(zoom + 0.25, 3)); onPan(0, 0); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
