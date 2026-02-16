@@ -2,6 +2,7 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
+import LuxuryShowcase from "@/components/LuxuryShowcase";
 import PrintWizard from "@/components/wizard/PrintWizard";
 
 import Testimonials from "@/components/Testimonials";
@@ -38,6 +39,7 @@ const Index = () => {
       <main>
         <Hero />
         <HowItWorks />
+        <LuxuryShowcase />
         <PrintWizard />
         
         <Testimonials />
