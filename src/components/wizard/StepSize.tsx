@@ -112,16 +112,24 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
 
   const handleSlotSelect = (slotIndex: number, image: SelectedImage) => {
     const updated = [...additionalPrints];
-    while (updated.length <= slotIndex) updated.push({ image: null, uploadedFile: null });
-    updated[slotIndex] = { image, uploadedFile: null };
+    while (updated.length <= slotIndex) updated.push({ image: null, uploadedFile: null, orientation: "landscape" });
+    updated[slotIndex] = { ...updated[slotIndex], image, uploadedFile: null };
     onAdditionalPrints(updated);
   };
 
   const handleSlotUpload = (slotIndex: number, dataUrl: string) => {
     const updated = [...additionalPrints];
-    while (updated.length <= slotIndex) updated.push({ image: null, uploadedFile: null });
-    updated[slotIndex] = { image: null, uploadedFile: dataUrl };
+    while (updated.length <= slotIndex) updated.push({ image: null, uploadedFile: null, orientation: "landscape" });
+    updated[slotIndex] = { ...updated[slotIndex], image: null, uploadedFile: dataUrl };
     onAdditionalPrints(updated);
+  };
+
+  const handleSlotOrientation = (slotIndex: number, ori: "landscape" | "portrait") => {
+    const updated = [...additionalPrints];
+    if (updated[slotIndex]) {
+      updated[slotIndex] = { ...updated[slotIndex], orientation: ori };
+      onAdditionalPrints(updated);
+    }
   };
 
   const totalPrice = (basePricePerUnit: number) => basePricePerUnit * quantity;
@@ -166,8 +174,12 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
                     </div>
                     {Array.from({ length: quantity - 1 }).map((_, idx) => {
                       const slotImg = getSlotImg(idx);
+                      const slotOri = additionalPrints[idx]?.orientation || "landscape";
+                      const slotW = slotOri === "portrait" ? Math.min(selected.w, selected.h) : Math.max(selected.w, selected.h);
+                      const slotH = slotOri === "portrait" ? Math.max(selected.w, selected.h) : Math.min(selected.w, selected.h);
+                      const slotAspect = slotW / slotH;
                       return (
-                        <div key={idx} className="shadow-[0_4px_20px_rgba(0,0,0,0.3)] overflow-hidden shrink-0 bg-muted/50 cursor-pointer" style={{ width: `${Math.max((displayW / sceneW) * 100, 8)}vw`, maxWidth: `${(displayW / sceneW) * 720}px`, aspectRatio: `${printAspect}` }} onClick={() => setPickerSlot(idx)}>
+                        <div key={idx} className="shadow-[0_4px_20px_rgba(0,0,0,0.3)] overflow-hidden shrink-0 bg-muted/50 cursor-pointer" style={{ width: `${Math.max((slotW / sceneW) * 100, 8)}vw`, maxWidth: `${(slotW / sceneW) * 720}px`, aspectRatio: `${slotAspect}` }} onClick={() => setPickerSlot(idx)}>
                           {slotImg ? (
                             <img src={slotImg} alt={`Print ${idx + 2}`} className="w-full h-full object-cover" />
                           ) : (
@@ -268,7 +280,7 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
                             onQuantity(q);
                             if (q >= 2) {
                               const current = [...additionalPrints];
-                              while (current.length < q - 1) current.push({ image: null, uploadedFile: null });
+                              while (current.length < q - 1) current.push({ image: null, uploadedFile: null, orientation: "landscape" });
                               onAdditionalPrints(current.slice(0, q - 1));
                             } else {
                               onAdditionalPrints([]);
@@ -288,20 +300,42 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
                   <div className="mt-1.5 grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                     {Array.from({ length: quantity - 1 }).map((_, idx) => {
                       const slotImg = getSlotImg(idx);
+                      const slotOri = additionalPrints[idx]?.orientation || "landscape";
+                      const slotIsSquare = selected.w === selected.h;
                       return (
-                        <button key={idx} onClick={() => setPickerSlot(idx)} className="flex items-center gap-2 bg-card border border-border rounded-lg px-2.5 py-2 hover:border-primary/40 transition-colors text-left">
-                          {slotImg ? (
-                            <img src={slotImg} alt={`Print ${idx + 2}`} className="w-8 h-8 rounded object-cover border border-border shrink-0" />
-                          ) : (
-                            <div className="w-8 h-8 rounded border-2 border-dashed border-primary/30 flex items-center justify-center bg-primary/5 shrink-0">
-                              <Plus className="w-3.5 h-3.5 text-primary/50" />
+                        <div key={idx} className="bg-card border border-border rounded-lg px-2.5 py-2 space-y-1.5">
+                          <button onClick={() => setPickerSlot(idx)} className="flex items-center gap-2 hover:opacity-80 transition-opacity text-left w-full">
+                            {slotImg ? (
+                              <img src={slotImg} alt={`Print ${idx + 2}`} className="w-8 h-8 rounded object-cover border border-border shrink-0" />
+                            ) : (
+                              <div className="w-8 h-8 rounded border-2 border-dashed border-primary/30 flex items-center justify-center bg-primary/5 shrink-0">
+                                <Plus className="w-3.5 h-3.5 text-primary/50" />
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-body font-semibold text-foreground truncate">Print {idx + 2}</p>
+                              <p className="text-[9px] text-muted-foreground font-body">{slotImg ? "Tap to change" : "Add image"}</p>
+                            </div>
+                          </button>
+                          {!slotIsSquare && (
+                            <div className="flex rounded overflow-hidden border border-border">
+                              <button
+                                onClick={() => handleSlotOrientation(idx, "landscape")}
+                                className={`flex-1 flex items-center justify-center gap-1 py-1 text-[9px] font-body transition-colors ${slotOri === "landscape" ? "bg-primary/20 text-primary font-semibold" : "text-muted-foreground hover:text-foreground"}`}
+                              >
+                                <RectangleHorizontal className="w-3 h-3" />
+                                Land
+                              </button>
+                              <button
+                                onClick={() => handleSlotOrientation(idx, "portrait")}
+                                className={`flex-1 flex items-center justify-center gap-1 py-1 text-[9px] font-body transition-colors ${slotOri === "portrait" ? "bg-primary/20 text-primary font-semibold" : "text-muted-foreground hover:text-foreground"}`}
+                              >
+                                <RectangleVertical className="w-3 h-3" />
+                                Port
+                              </button>
                             </div>
                           )}
-                          <div className="min-w-0">
-                            <p className="text-[10px] font-body font-semibold text-foreground truncate">Print {idx + 2}</p>
-                            <p className="text-[9px] text-muted-foreground font-body">{slotImg ? "Tap to change" : "Add image"}</p>
-                          </div>
-                        </button>
+                        </div>
                       );
                     })}
                   </div>

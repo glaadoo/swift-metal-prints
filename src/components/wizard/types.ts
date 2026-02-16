@@ -13,6 +13,7 @@ export const CUSTOM_SIZE_IDX = -1;
 export interface AdditionalPrint {
   image: SelectedImage | null;
   uploadedFile: string | null;
+  orientation: "landscape" | "portrait";
 }
 
 export interface CartItem {
