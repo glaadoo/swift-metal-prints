@@ -138,247 +138,242 @@ const StepSize = ({ imageUrl, sizeIdx, material, companionPrint, onSelect, onSel
       {/* Hidden file input for companion */}
       <input ref={companionFileRef} type="file" accept="image/*" className="hidden" onChange={handleCompanionUpload} />
 
-      {/* Wall/shelf backdrop with print(s) */}
-      <div className="flex justify-center">
-        {(() => {
-          const backdropImg = isDesk ? shelfBackdrop : couchWall;
-          const WALL_W = isDesk ? 24 : 96;
-          const containerAspect = isDesk ? "3/4" : "16/9";
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* LEFT: Preview */}
+        <div className="flex justify-center lg:sticky lg:top-4 lg:self-start">
+          {(() => {
+            const backdropImg = isDesk ? shelfBackdrop : couchWall;
+            const WALL_W = isDesk ? 24 : 96;
+            const containerAspect = isDesk ? "3/4" : "16/9";
 
-          // Calculate main print dimensions
-          const printWPct = Math.max((displayW / WALL_W) * 100, 10);
-          const printAspect = displayW / displayH;
-          const printBottom = isDesk ? "38%" : undefined;
-          const printTop = isDesk ? undefined : "35%";
+            const printWPct = Math.max((displayW / WALL_W) * 100, 10);
+            const printAspect = displayW / displayH;
+            const printBottom = isDesk ? "38%" : undefined;
+            const printTop = isDesk ? undefined : "35%";
 
-          // If companion exists and desk size, show side-by-side
-          if (isDesk && hasCompanion) {
-            const gap = 2; // inches
-            const totalW = displayW + companionDisplayW + gap;
-            const sceneW = Math.max(WALL_W, totalW * 1.5);
+            if (isDesk && hasCompanion) {
+              const gap = 2;
+              const totalW = displayW + companionDisplayW + gap;
+              const sceneW = Math.max(WALL_W, totalW * 1.5);
 
-            return (
-              <div className="relative w-full overflow-hidden rounded-lg border border-border" style={{ maxWidth: 720, aspectRatio: containerAspect }}>
-                <img src={backdropImg} alt="Room backdrop" className="absolute inset-0 w-full h-full object-cover" />
-                <div
-                  className="absolute left-1/2 -translate-x-1/2 flex items-end gap-[2%]"
-                  style={{ bottom: "38%" }}
-                >
-                  {/* Main print */}
+              return (
+                <div className="relative w-full overflow-hidden rounded-lg border border-border" style={{ aspectRatio: containerAspect }}>
+                  <img src={backdropImg} alt="Room backdrop" className="absolute inset-0 w-full h-full object-cover" />
                   <div
-                    className="shadow-[0_4px_20px_rgba(0,0,0,0.3)] overflow-hidden shrink-0"
-                    style={{
-                      width: `${Math.max((displayW / sceneW) * 100, 8)}vw`,
-                      maxWidth: `${(displayW / sceneW) * 720}px`,
-                      aspectRatio: `${printAspect}`,
-                    }}
+                    className="absolute left-1/2 -translate-x-1/2 flex items-end gap-[2%]"
+                    style={{ bottom: "38%" }}
                   >
-                    <img
-                      src={imageUrl}
-                      alt="Main print"
-                      className="w-full h-full object-cover"
+                    <div
+                      className="shadow-[0_4px_20px_rgba(0,0,0,0.3)] overflow-hidden shrink-0"
                       style={{
-                        transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
-                        transformOrigin: "center center",
+                        width: `${Math.max((displayW / sceneW) * 100, 8)}vw`,
+                        maxWidth: `${(displayW / sceneW) * 720}px`,
+                        aspectRatio: `${printAspect}`,
                       }}
-                    />
+                    >
+                      <img
+                        src={imageUrl}
+                        alt="Main print"
+                        className="w-full h-full object-cover"
+                        style={{
+                          transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+                          transformOrigin: "center center",
+                        }}
+                      />
+                    </div>
+                    <div
+                      className="shadow-[0_4px_20px_rgba(0,0,0,0.3)] overflow-hidden shrink-0 bg-muted/50"
+                      style={{
+                        width: `${Math.max((companionDisplayW / sceneW) * 100, 8)}vw`,
+                        maxWidth: `${(companionDisplayW / sceneW) * 720}px`,
+                        aspectRatio: `${companionDisplayW / companionDisplayH}`,
+                      }}
+                    >
+                      {companionImgSrc ? (
+                        <img src={companionImgSrc} alt="Companion print" className="w-full h-full object-cover" />
+                      ) : (
+                        <div
+                          className="w-full h-full flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-muted/70 transition-colors"
+                          onClick={() => companionFileRef.current?.click()}
+                        >
+                          <Upload className="w-5 h-5 text-muted-foreground" />
+                          <span className="text-[9px] text-muted-foreground font-body">Add image</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  {/* Companion print */}
-                  <div
-                    className="shadow-[0_4px_20px_rgba(0,0,0,0.3)] overflow-hidden shrink-0 bg-muted/50"
-                    style={{
-                      width: `${Math.max((companionDisplayW / sceneW) * 100, 8)}vw`,
-                      maxWidth: `${(companionDisplayW / sceneW) * 720}px`,
-                      aspectRatio: `${companionDisplayW / companionDisplayH}`,
-                    }}
-                  >
-                    {companionImgSrc ? (
-                      <img src={companionImgSrc} alt="Companion print" className="w-full h-full object-cover" />
-                    ) : (
-                      <div
-                        className="w-full h-full flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-muted/70 transition-colors"
-                        onClick={() => companionFileRef.current?.click()}
-                      >
-                        <Upload className="w-5 h-5 text-muted-foreground" />
-                        <span className="text-[9px] text-muted-foreground font-body">Add image</span>
-                      </div>
-                    )}
+                  <div className="absolute bottom-2 left-2 bg-card/80 backdrop-blur-sm border border-border rounded px-2.5 py-1">
+                    <span className="text-sm font-body text-primary font-semibold">{displayLabel}</span>
+                    <span className="text-[10px] text-muted-foreground font-body mx-1">+</span>
+                    <span className="text-sm font-body text-primary font-semibold">
+                      {companionSize && (companionPrint?.orientation === "portrait"
+                        ? `${Math.min(companionSize.w, companionSize.h)}"×${Math.max(companionSize.w, companionSize.h)}"`
+                        : companionSize?.label)}
+                    </span>
                   </div>
                 </div>
-                {/* Labels */}
-                <div className="absolute bottom-2 left-2 bg-card/80 backdrop-blur-sm border border-border rounded px-2.5 py-1">
-                  <span className="text-sm font-body text-primary font-semibold">{displayLabel}</span>
-                  <span className="text-[10px] text-muted-foreground font-body mx-1">+</span>
-                  <span className="text-sm font-body text-primary font-semibold">
-                    {companionSize && (companionPrint?.orientation === "portrait"
-                      ? `${Math.min(companionSize.w, companionSize.h)}"×${Math.max(companionSize.w, companionSize.h)}"`
-                      : companionSize?.label)}
-                  </span>
+              );
+            }
+
+            return (
+              <div className="relative w-full overflow-hidden rounded-lg border border-border" style={{ aspectRatio: containerAspect }}>
+                <img src={backdropImg} alt="Room backdrop" className="absolute inset-0 w-full h-full object-cover" />
+                <div
+                  className={`absolute left-1/2 -translate-x-1/2 shadow-[0_4px_30px_rgba(0,0,0,0.3)] transition-all duration-500 ease-out overflow-hidden cursor-grab active:cursor-grabbing ${printTop ? '-translate-y-1/2' : ''}`}
+                  style={{
+                    width: `${printWPct}%`,
+                    paddingBottom: `${printWPct / printAspect}%`,
+                    height: 0,
+                    ...(printTop ? { top: printTop } : { bottom: printBottom }),
+                  }}
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                >
+                  <img
+                    src={imageUrl}
+                    alt="Print preview"
+                    className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+                    draggable={false}
+                    style={{
+                      transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+                      transformOrigin: "center center",
+                    }}
+                  />
+                </div>
+                <div className="absolute top-2 right-2 flex flex-col gap-1">
+                  <button onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.min(z + 0.25, 3)); setPan({ x: 0, y: 0 }); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom in">
+                    <ZoomIn className="w-4 h-4" />
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.max(z - 0.25, 1)); setPan({ x: 0, y: 0 }); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom out">
+                    <ZoomOut className="w-4 h-4" />
+                  </button>
+                  {zoom > 1 && (
+                    <button onClick={(e) => { e.stopPropagation(); setZoom(1); setPan({ x: 0, y: 0 }); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Reset">
+                      <Move className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                  <div className="bg-card/80 backdrop-blur-sm border border-border rounded px-2.5 py-1">
+                    <span className="text-sm font-body text-primary font-semibold">{displayLabel}</span>
+                    <span className="text-[10px] text-muted-foreground font-body ml-1.5">{selected.w * selected.h} sq in</span>
+                  </div>
+                  {!isSquare && (
+                    <div className="flex bg-card/80 backdrop-blur-sm border border-border rounded overflow-hidden">
+                      <button onClick={() => setOrientation("landscape")} className={`p-1.5 transition-colors ${orientation === "landscape" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`} title="Landscape">
+                        <RectangleHorizontal className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => setOrientation("portrait")} className={`p-1.5 transition-colors ${orientation === "portrait" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`} title="Portrait">
+                        <RectangleVertical className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
-          }
+          })()}
+        </div>
 
-          // Single print preview
-          return (
-            <div className="relative w-full overflow-hidden rounded-lg border border-border" style={{ maxWidth: 720, aspectRatio: containerAspect }}>
-              <img src={backdropImg} alt="Room backdrop" className="absolute inset-0 w-full h-full object-cover" />
-              <div
-                className={`absolute left-1/2 -translate-x-1/2 shadow-[0_4px_30px_rgba(0,0,0,0.3)] transition-all duration-500 ease-out overflow-hidden cursor-grab active:cursor-grabbing ${printTop ? '-translate-y-1/2' : ''}`}
-                style={{
-                  width: `${printWPct}%`,
-                  paddingBottom: `${printWPct / printAspect}%`,
-                  height: 0,
-                  ...(printTop ? { top: printTop } : { bottom: printBottom }),
-                }}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-              >
-                <img
-                  src={imageUrl}
-                  alt="Print preview"
-                  className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
-                  draggable={false}
-                  style={{
-                    transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
-                    transformOrigin: "center center",
-                  }}
-                />
-              </div>
-              {/* Zoom controls */}
-              <div className="absolute top-2 right-2 flex flex-col gap-1">
-                <button onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.min(z + 0.25, 3)); setPan({ x: 0, y: 0 }); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom in">
-                  <ZoomIn className="w-4 h-4" />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); setZoom((z) => Math.max(z - 0.25, 1)); setPan({ x: 0, y: 0 }); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom out">
-                  <ZoomOut className="w-4 h-4" />
-                </button>
-                {zoom > 1 && (
-                  <button onClick={(e) => { e.stopPropagation(); setZoom(1); setPan({ x: 0, y: 0 }); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Reset">
-                    <Move className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-              {/* Size label + orientation toggle */}
-              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-                <div className="bg-card/80 backdrop-blur-sm border border-border rounded px-2.5 py-1">
-                  <span className="text-sm font-body text-primary font-semibold">{displayLabel}</span>
-                  <span className="text-[10px] text-muted-foreground font-body ml-1.5">{selected.w * selected.h} sq in</span>
+        {/* RIGHT: Size + Material selection */}
+        <div className="space-y-4">
+          {/* Size selection */}
+          {sizeGroups.map((group) => {
+            const items = standardSizes.slice(group.range[0], group.range[1]);
+
+            return (
+              <div key={group.label}>
+                <h3 className="text-[10px] font-body font-semibold tracking-[0.2em] uppercase text-primary mb-1.5">
+                  {group.label}
+                </h3>
+                <div className="flex gap-1.5 flex-wrap">
+                  {items.map((size, i) => {
+                    const idx = group.range[0] + i;
+                    const isSelected = idx === sizeIdx;
+                    return (
+                      <Card
+                        key={idx}
+                        className={`px-2.5 py-1.5 text-center cursor-pointer transition-all duration-200 shrink-0 ${
+                          isSelected
+                            ? "ring-2 ring-primary border-primary bg-primary/5"
+                            : "border-border hover:border-primary/40"
+                        }`}
+                        onClick={() => {
+                          onSelect(idx);
+                          if (idx >= DESK_SHELF_MAX_IDX && companionPrint) {
+                            onCompanionChange(null);
+                          }
+                        }}
+                      >
+                        <p className="text-[11px] font-display font-bold text-foreground leading-tight whitespace-nowrap">{size.label}</p>
+                      </Card>
+                    );
+                  })}
                 </div>
-                {!isSquare && (
-                  <div className="flex bg-card/80 backdrop-blur-sm border border-border rounded overflow-hidden">
-                    <button onClick={() => setOrientation("landscape")} className={`p-1.5 transition-colors ${orientation === "landscape" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`} title="Landscape">
-                      <RectangleHorizontal className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => setOrientation("portrait")} className={`p-1.5 transition-colors ${orientation === "portrait" ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"}`} title="Portrait">
-                      <RectangleVertical className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
               </div>
-            </div>
-          );
-        })()}
-      </div>
+            );
+          })}
 
-      {/* Size selection */}
-      {sizeGroups.map((group) => {
-        const items = standardSizes.slice(group.range[0], group.range[1]);
-
-        return (
-          <div key={group.label}>
+          {/* Material selection */}
+          <div>
             <h3 className="text-[10px] font-body font-semibold tracking-[0.2em] uppercase text-primary mb-1.5">
-              {group.label}
+              Choose Your Medium
             </h3>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-              {items.map((size, i) => {
-                const idx = group.range[0] + i;
-                const isSelected = idx === sizeIdx;
+            <div className="grid grid-cols-3 gap-3">
+              {materialOpts.map((mat) => {
+                const isSelected = material === mat.id;
+                const size = standardSizes[sizeIdx];
+                const price = mat.id === "acrylic"
+                  ? calcAcrylicPrice(size.w, size.h)
+                  : mat.id === "metal-designer"
+                    ? calcMetalPrice(size.w, size.h, metalOptions[0])
+                    : calcMetalPrice(size.w, size.h, metalOptions[2]);
+
+                const companionPrice = hasCompanion && companionSize
+                  ? (mat.id === "acrylic"
+                    ? calcAcrylicPrice(companionSize.w, companionSize.h)
+                    : mat.id === "metal-designer"
+                      ? calcMetalPrice(companionSize.w, companionSize.h, metalOptions[0])
+                      : calcMetalPrice(companionSize.w, companionSize.h, metalOptions[2]))
+                  : 0;
+
+                const totalPrice = price + companionPrice;
+
                 return (
                   <Card
-                    key={idx}
-                    className={`px-2.5 py-1.5 text-center cursor-pointer transition-all duration-200 shrink-0 ${
-                      isSelected
-                        ? "ring-2 ring-primary border-primary bg-primary/5"
-                        : "border-border hover:border-primary/40"
+                    key={mat.id}
+                    className={`overflow-hidden cursor-pointer transition-all duration-200 ${
+                      isSelected ? "ring-2 ring-primary border-primary" : "border-border hover:border-primary/40"
                     }`}
-                    onClick={() => {
-                      onSelect(idx);
-                      // Clear companion if moving to non-desk size
-                      if (idx >= DESK_SHELF_MAX_IDX && companionPrint) {
-                        onCompanionChange(null);
-                      }
-                    }}
+                    onClick={() => onSelectMaterial(mat.id)}
                   >
-                    <p className="text-[11px] font-display font-bold text-foreground leading-tight whitespace-nowrap">{size.label}</p>
+                    <div className="aspect-[16/9] relative overflow-hidden">
+                      <img src={mat.img} alt={mat.label} className="w-full h-full object-cover" />
+                      {isSelected && (
+                        <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-primary-foreground" />
+                        </div>
+                      )}
+                      <div className="absolute bottom-1 left-1 w-10 h-10 rounded border border-border/50 overflow-hidden shadow-md">
+                        <img src={mat.cornerImg} alt={`${mat.label} corner detail`} className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+                    <div className="p-2 text-center">
+                      <div className="flex items-center justify-center gap-1 text-primary">
+                        {mat.icon}
+                        <span className="text-xs font-display font-bold text-foreground">{mat.label}</span>
+                      </div>
+                      <p className="text-[9px] text-muted-foreground font-body">{mat.subtitle}</p>
+                      <p className="text-sm font-display font-bold text-gradient-gold mt-0.5">
+                        ${totalPrice}
+                        {hasCompanion && <span className="text-[9px] text-muted-foreground font-body ml-1">(2 prints)</span>}
+                      </p>
+                    </div>
                   </Card>
                 );
               })}
             </div>
           </div>
-        );
-      })}
-
-      {/* Material selection */}
-      <div>
-        <h3 className="text-[10px] font-body font-semibold tracking-[0.2em] uppercase text-primary mb-1.5">
-          Choose Your Medium
-        </h3>
-        <div className="grid grid-cols-3 gap-3">
-          {materialOpts.map((mat) => {
-            const isSelected = material === mat.id;
-            const size = standardSizes[sizeIdx];
-            const price = mat.id === "acrylic"
-              ? calcAcrylicPrice(size.w, size.h)
-              : mat.id === "metal-designer"
-                ? calcMetalPrice(size.w, size.h, metalOptions[0])
-                : calcMetalPrice(size.w, size.h, metalOptions[2]);
-
-            // If companion, calculate companion price too
-            const companionPrice = hasCompanion && companionSize
-              ? (mat.id === "acrylic"
-                ? calcAcrylicPrice(companionSize.w, companionSize.h)
-                : mat.id === "metal-designer"
-                  ? calcMetalPrice(companionSize.w, companionSize.h, metalOptions[0])
-                  : calcMetalPrice(companionSize.w, companionSize.h, metalOptions[2]))
-              : 0;
-
-            const totalPrice = price + companionPrice;
-
-            return (
-              <Card
-                key={mat.id}
-                className={`overflow-hidden cursor-pointer transition-all duration-200 ${
-                  isSelected ? "ring-2 ring-primary border-primary" : "border-border hover:border-primary/40"
-                }`}
-                onClick={() => onSelectMaterial(mat.id)}
-              >
-                <div className="aspect-[16/9] relative overflow-hidden">
-                  <img src={mat.img} alt={mat.label} className="w-full h-full object-cover" />
-                  {isSelected && (
-                    <div className="absolute top-1.5 right-1.5 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                      <Check className="w-3 h-3 text-primary-foreground" />
-                    </div>
-                  )}
-                  <div className="absolute bottom-1 left-1 w-10 h-10 rounded border border-border/50 overflow-hidden shadow-md">
-                    <img src={mat.cornerImg} alt={`${mat.label} corner detail`} className="w-full h-full object-cover" />
-                  </div>
-                </div>
-                <div className="p-2 text-center">
-                  <div className="flex items-center justify-center gap-1 text-primary">
-                    {mat.icon}
-                    <span className="text-xs font-display font-bold text-foreground">{mat.label}</span>
-                  </div>
-                  <p className="text-[9px] text-muted-foreground font-body">{mat.subtitle}</p>
-                  <p className="text-sm font-display font-bold text-gradient-gold mt-0.5">
-                    ${totalPrice}
-                    {hasCompanion && <span className="text-[9px] text-muted-foreground font-body ml-1">(2 prints)</span>}
-                  </p>
-                </div>
-              </Card>
-            );
-          })}
         </div>
       </div>
 
