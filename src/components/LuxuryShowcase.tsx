@@ -12,7 +12,7 @@ const slides = [
   {
     image: metalLiving,
     label: "Grand Scale",
-    caption: "A grand luxury wall awaiting your vision — imagine your art at monumental scale.",
+    caption: "A grand wedding ballroom wall awaiting your vision — imagine your art at monumental scale.",
   },
   {
     image: acrylicDining,
