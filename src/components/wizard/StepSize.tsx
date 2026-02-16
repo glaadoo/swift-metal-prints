@@ -70,20 +70,28 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     isDragging.current = true;
-    dragStart.current = { x: e.clientX, y: e.clientY, panX, panY };
+    const curPanX = activePrintIdx === 0 ? panX : (additionalPrints[activePrintIdx - 1]?.panX ?? 0);
+    const curPanY = activePrintIdx === 0 ? panY : (additionalPrints[activePrintIdx - 1]?.panY ?? 0);
+    dragStart.current = { x: e.clientX, y: e.clientY, panX: curPanX, panY: curPanY };
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  }, [panX, panY]);
+  }, [panX, panY, activePrintIdx, additionalPrints]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isDragging.current) return;
     const dx = e.clientX - dragStart.current.x;
     const dy = e.clientY - dragStart.current.y;
-    const maxPan = (zoom - 1) * 50;
-    onPan(
-      Math.max(-maxPan, Math.min(maxPan, dragStart.current.panX + dx)),
-      Math.max(-maxPan, Math.min(maxPan, dragStart.current.panY + dy)),
-    );
-  }, [zoom, onPan]);
+    const curZoom = activePrintIdx === 0 ? zoom : (additionalPrints[activePrintIdx - 1]?.zoom ?? 1);
+    const maxPan = (curZoom - 1) * 50;
+    const newX = Math.max(-maxPan, Math.min(maxPan, dragStart.current.panX + dx));
+    const newY = Math.max(-maxPan, Math.min(maxPan, dragStart.current.panY + dy));
+    if (activePrintIdx === 0) {
+      onPan(newX, newY);
+    } else {
+      const updated = [...additionalPrints];
+      const i = activePrintIdx - 1;
+      if (updated[i]) { updated[i] = { ...updated[i], panX: newX, panY: newY }; onAdditionalPrints(updated); }
+    }
+  }, [zoom, onPan, activePrintIdx, additionalPrints, onAdditionalPrints]);
 
   const handlePointerUp = useCallback(() => {
     isDragging.current = false;
@@ -115,14 +123,14 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
 
   const handleSlotSelect = (slotIndex: number, image: SelectedImage) => {
     const updated = [...additionalPrints];
-    while (updated.length <= slotIndex) updated.push({ image: null, uploadedFile: null, orientation: "landscape" });
+    while (updated.length <= slotIndex) updated.push({ image: null, uploadedFile: null, orientation: "landscape", zoom: 1, panX: 0, panY: 0, rotation: 0 });
     updated[slotIndex] = { ...updated[slotIndex], image, uploadedFile: null };
     onAdditionalPrints(updated);
   };
 
   const handleSlotUpload = (slotIndex: number, dataUrl: string) => {
     const updated = [...additionalPrints];
-    while (updated.length <= slotIndex) updated.push({ image: null, uploadedFile: null, orientation: "landscape" });
+    while (updated.length <= slotIndex) updated.push({ image: null, uploadedFile: null, orientation: "landscape", zoom: 1, panX: 0, panY: 0, rotation: 0 });
     updated[slotIndex] = { ...updated[slotIndex], image: null, uploadedFile: dataUrl };
     onAdditionalPrints(updated);
   };
@@ -136,6 +144,31 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
   };
 
   const totalPrice = (basePricePerUnit: number) => basePricePerUnit * quantity;
+
+  // Per-print transform helpers
+  const getActiveZoom = () => activePrintIdx === 0 ? zoom : (additionalPrints[activePrintIdx - 1]?.zoom ?? 1);
+  const getActivePanX = () => activePrintIdx === 0 ? panX : (additionalPrints[activePrintIdx - 1]?.panX ?? 0);
+  const getActivePanY = () => activePrintIdx === 0 ? panY : (additionalPrints[activePrintIdx - 1]?.panY ?? 0);
+  const getActiveRotation = () => activePrintIdx === 0 ? rotation : (additionalPrints[activePrintIdx - 1]?.rotation ?? 0);
+
+  const setActiveZoom = (z: number) => {
+    if (activePrintIdx === 0) { onZoom(z); return; }
+    const updated = [...additionalPrints];
+    const i = activePrintIdx - 1;
+    if (updated[i]) { updated[i] = { ...updated[i], zoom: z, panX: 0, panY: 0 }; onAdditionalPrints(updated); }
+  };
+  const setActivePan = (x: number, y: number) => {
+    if (activePrintIdx === 0) { onPan(x, y); return; }
+    const updated = [...additionalPrints];
+    const i = activePrintIdx - 1;
+    if (updated[i]) { updated[i] = { ...updated[i], panX: x, panY: y }; onAdditionalPrints(updated); }
+  };
+  const setActiveRotation = (r: number) => {
+    if (activePrintIdx === 0) { onRotate(r); return; }
+    const updated = [...additionalPrints];
+    const i = activePrintIdx - 1;
+    if (updated[i]) { updated[i] = { ...updated[i], rotation: r }; onAdditionalPrints(updated); }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -232,6 +265,11 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
                       const slotH = slotOri === "portrait" ? Math.max(selected.w, selected.h) : Math.min(selected.w, selected.h);
                       const slotAspect = slotW / slotH;
                       const isActive = activePrintIdx === idx + 1;
+                      const ap = additionalPrints[idx];
+                      const apZoom = ap?.zoom ?? 1;
+                      const apPanX = ap?.panX ?? 0;
+                      const apPanY = ap?.panY ?? 0;
+                      const apRotation = ap?.rotation ?? 0;
                       return (
                         <div
                           key={idx}
@@ -241,9 +279,12 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
                             setActivePrintIdx(idx + 1);
                             if (!slotImg) setPickerSlot(idx);
                           }}
+                          onPointerDown={isActive && slotImg ? handlePointerDown : undefined}
+                          onPointerMove={isActive && slotImg ? handlePointerMove : undefined}
+                          onPointerUp={isActive && slotImg ? handlePointerUp : undefined}
                         >
                           {slotImg ? (
-                            <img src={slotImg} alt={`Print ${idx + 2}`} className="w-full h-full object-cover" />
+                            <img src={slotImg} alt={`Print ${idx + 2}`} className="w-full h-full object-cover select-none pointer-events-none" draggable={false} style={{ transform: `scale(${apZoom}) translate(${apPanX / apZoom}px, ${apPanY / apZoom}px) rotate(${apRotation}deg)`, transformOrigin: "center center" }} />
                           ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center gap-1 hover:bg-muted/70 transition-colors">
                               <Plus className="w-5 h-5 text-muted-foreground" />
@@ -256,15 +297,28 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
                   </div>
                   {/* Image tools for active print */}
                   <div className="absolute top-2 right-2 flex flex-col gap-1">
-                    {activePrintIdx === 0 ? (
-                      <>
-                        <button onClick={(e) => { e.stopPropagation(); onZoom(Math.min(zoom + 0.25, 3)); onPan(0, 0); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
-                        <button onClick={(e) => { e.stopPropagation(); onZoom(Math.max(zoom - 0.25, 1)); onPan(0, 0); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom out"><ZoomOut className="w-4 h-4" /></button>
-                        <button onClick={(e) => { e.stopPropagation(); onRotate((rotation + 90) % 360); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Rotate"><RotateCw className="w-4 h-4" /></button>
-                      </>
-                    ) : (
-                      <button onClick={(e) => { e.stopPropagation(); setPickerSlot(activePrintIdx - 1); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Change image"><Upload className="w-4 h-4" /></button>
-                    )}
+                    {(() => {
+                      const hasActiveImg = activePrintIdx === 0 ? true : !!getSlotImg(activePrintIdx - 1);
+                      const aZoom = getActiveZoom();
+                      const aPanX = getActivePanX();
+                      const aPanY = getActivePanY();
+                      const aRotation = getActiveRotation();
+                      return hasActiveImg ? (
+                        <>
+                          <button onClick={(e) => { e.stopPropagation(); setActiveZoom(Math.min(aZoom + 0.25, 3)); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom in"><ZoomIn className="w-4 h-4" /></button>
+                          <button onClick={(e) => { e.stopPropagation(); setActiveZoom(Math.max(aZoom - 0.25, 1)); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Zoom out"><ZoomOut className="w-4 h-4" /></button>
+                          <button onClick={(e) => { e.stopPropagation(); setActiveRotation((aRotation + 90) % 360); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Rotate"><RotateCw className="w-4 h-4" /></button>
+                          {activePrintIdx > 0 && (
+                            <button onClick={(e) => { e.stopPropagation(); setPickerSlot(activePrintIdx - 1); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Change image"><Upload className="w-4 h-4" /></button>
+                          )}
+                          {(aZoom > 1 || aPanX !== 0 || aPanY !== 0) && (
+                            <button onClick={(e) => { e.stopPropagation(); setActiveZoom(1); setActivePan(0, 0); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Reset"><Move className="w-4 h-4" /></button>
+                          )}
+                        </>
+                      ) : (
+                        <button onClick={(e) => { e.stopPropagation(); setPickerSlot(activePrintIdx - 1); }} className="w-7 h-7 bg-card/80 backdrop-blur-sm border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors" title="Add image"><Upload className="w-4 h-4" /></button>
+                      );
+                    })()}
                   </div>
                   {/* Active print label */}
                   <div className="absolute bottom-2 left-2 bg-card/80 backdrop-blur-sm border border-border rounded px-2.5 py-1">
@@ -356,7 +410,7 @@ const StepSize = ({ imageUrl, sizeIdx, customWidth, customHeight, quantity, mate
                             onQuantity(q);
                             if (q >= 2) {
                               const current = [...additionalPrints];
-                              while (current.length < q - 1) current.push({ image: null, uploadedFile: null, orientation: "landscape" });
+                              while (current.length < q - 1) current.push({ image: null, uploadedFile: null, orientation: "landscape", zoom: 1, panX: 0, panY: 0, rotation: 0 });
                               onAdditionalPrints(current.slice(0, q - 1));
                             } else {
                               onAdditionalPrints([]);
