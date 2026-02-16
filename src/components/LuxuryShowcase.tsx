@@ -12,7 +12,7 @@ const slides = [
   {
     image: metalLiving,
     label: "Grand Scale",
-    caption: "A monumental wedding portrait on metal commands a grand living room with breathtaking presence.",
+    caption: "A grand luxury wall awaiting your vision — imagine your art at monumental scale.",
   },
   {
     image: acrylicDining,
@@ -22,7 +22,7 @@ const slides = [
   {
     image: dividerLoft,
     label: "Double-Sided Divider",
-    caption: "A suspended double-sided metal print divides a five-star hotel atrium with dramatic elegance.",
+    caption: "A double-sided metal print hangs as a dramatic suspended divider in a grand hotel lobby.",
   },
   {
     image: acrylicBedroom,
