@@ -26,10 +26,10 @@ interface Props {
   onBack: () => void;
 }
 
-const materialOpts: { id: MaterialChoice; label: string; subtitle: string; img: string; cornerImg: string; icon: React.ReactNode }[] = [
-  { id: "metal-designer", label: "Lux Metal", subtitle: '.040" Lightweight', img: metalImg, cornerImg: cornerLuxMetal, icon: <Gem className="w-4 h-4" /> },
-  { id: "metal-museum", label: "Designer Metal", subtitle: '.080" Heirloom', img: metalMuseumImg, cornerImg: cornerDesignerMetal, icon: <Shield className="w-4 h-4" /> },
-  { id: "acrylic", label: "Acrylic", subtitle: "Vivid & Luminous", img: acrylicImg, cornerImg: cornerAcrylic, icon: <Sparkles className="w-4 h-4" /> },
+const materialOpts: { id: MaterialChoice; label: string; subtitle: string; img: string; cornerImg: string; icon: React.ReactNode; benefits: string[] }[] = [
+  { id: "metal-designer", label: "Lux Metal", subtitle: '.040" Lightweight', img: metalImg, cornerImg: cornerLuxMetal, icon: <Gem className="w-4 h-4" />, benefits: ["Ultra-lightweight & easy to hang", "Scratch-resistant HD finish", "Best value for vibrant color"] },
+  { id: "metal-museum", label: "Designer Metal", subtitle: '.080" Heirloom', img: metalMuseumImg, cornerImg: cornerDesignerMetal, icon: <Shield className="w-4 h-4" />, benefits: ["2× thicker for gallery-grade rigidity", "Zero warp guaranteed for life", "Museum archival pigments"] },
+  { id: "acrylic", label: "Acrylic", subtitle: "Vivid & Luminous", img: acrylicImg, cornerImg: cornerAcrylic, icon: <Sparkles className="w-4 h-4" />, benefits: ["Backlit glow & glass-like depth", "Highest color saturation", "Stunning modern statement piece"] },
 ];
 
 const sizeGroups = [
@@ -360,13 +360,21 @@ const StepSize = ({ imageUrl, sizeIdx, material, companionPrint, onSelect, onSel
                     <img src={mat.cornerImg} alt={`${mat.label} corner detail`} className="w-full h-full object-cover" />
                   </div>
                 </div>
-                <div className="p-2 text-center">
+                <div className="p-2">
                   <div className="flex items-center justify-center gap-1 text-primary">
                     {mat.icon}
                     <span className="text-xs font-display font-bold text-foreground">{mat.label}</span>
                   </div>
-                  <p className="text-[9px] text-muted-foreground font-body">{mat.subtitle}</p>
-                  <p className="text-sm font-display font-bold text-gradient-gold mt-0.5">
+                  <p className="text-[9px] text-muted-foreground font-body text-center">{mat.subtitle}</p>
+                  <ul className="mt-1.5 space-y-0.5">
+                    {mat.benefits.map((b) => (
+                      <li key={b} className="flex items-start gap-1 text-[9px] text-muted-foreground font-body">
+                        <Check className="w-3 h-3 text-primary shrink-0 mt-[1px]" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-sm font-display font-bold text-gradient-gold mt-1.5 text-center">
                     ${totalPrice}
                     {hasCompanion && <span className="text-[9px] text-muted-foreground font-body ml-1">(2 prints)</span>}
                   </p>
