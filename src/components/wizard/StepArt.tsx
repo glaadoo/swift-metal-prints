@@ -106,21 +106,21 @@ const StepArt = ({ image, uploadedFile, onSelect, onUpload, onNext }: Props) => 
   const previewUrl = uploadedFile || image?.url;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-3">
       <div className="text-center">
-        <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground">
+        <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">
           Select Your Artwork
         </h2>
-        <p className="text-muted-foreground font-body mt-3 tracking-wide">
+        <p className="text-muted-foreground font-body mt-1 tracking-wide text-xs">
           Browse millions of photos or upload your own image.
         </p>
       </div>
 
       {/* Upload option */}
       <div className="flex justify-center">
-        <label className="flex items-center gap-3 px-6 py-4 border-2 border-dashed border-border hover:border-primary/50 rounded-lg cursor-pointer transition-colors bg-card">
-          <Upload className="w-5 h-5 text-primary" />
-          <span className="font-body text-foreground">Upload Your Photo</span>
+        <label className="flex items-center gap-2 px-5 py-2.5 border-2 border-dashed border-border hover:border-primary/50 rounded-lg cursor-pointer transition-colors bg-card">
+          <Upload className="w-4 h-4 text-primary" />
+          <span className="font-body text-sm text-foreground">Upload Your Photo</span>
           <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
         </label>
       </div>
@@ -128,33 +128,33 @@ const StepArt = ({ image, uploadedFile, onSelect, onUpload, onNext }: Props) => 
       {/* Divider */}
       <div className="flex items-center gap-4">
         <div className="flex-1 h-px bg-border" />
-        <span className="text-xs text-muted-foreground font-body tracking-[0.2em] uppercase">or browse gallery</span>
+        <span className="text-[10px] text-muted-foreground font-body tracking-[0.2em] uppercase">or browse gallery</span>
         <div className="flex-1 h-px bg-border" />
       </div>
 
       {/* Search */}
-      <form onSubmit={(e) => { e.preventDefault(); doSearch(query); }} className="flex gap-3 max-w-xl mx-auto">
+      <form onSubmit={(e) => { e.preventDefault(); doSearch(query); }} className="flex gap-2 max-w-xl mx-auto">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search... (e.g. sunset, mountains, flowers)"
-            className="pl-10 bg-secondary border-border text-foreground font-body"
+            className="pl-10 bg-secondary border-border text-foreground font-body h-9 text-sm"
           />
         </div>
-        <Button type="submit" disabled={loading} className="bg-gradient-gold text-primary-foreground font-body font-semibold hover:opacity-90">
+        <Button type="submit" disabled={loading} className="bg-gradient-gold text-primary-foreground font-body font-semibold hover:opacity-90 h-9 text-sm">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Search"}
         </Button>
       </form>
 
       {/* Genre tags */}
-      <div className="flex flex-wrap justify-center gap-2">
+      <div className="flex flex-wrap justify-center gap-1.5">
         {genres.map((tag) => (
           <Badge
             key={tag}
             variant="outline"
-            className="border-border text-muted-foreground hover:border-primary hover:text-primary cursor-pointer transition-colors font-body tracking-wider text-[10px]"
+            className="border-border text-muted-foreground hover:border-primary hover:text-primary cursor-pointer transition-colors font-body tracking-wider text-[10px] py-0.5"
             onClick={() => { setQuery(tag); doSearch(tag); }}
           >
             {tag}
@@ -164,16 +164,16 @@ const StepArt = ({ image, uploadedFile, onSelect, onUpload, onNext }: Props) => 
 
       {/* Initial loading */}
       {loading && photos.length === 0 && (
-        <div className="text-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-3" />
-          <p className="text-muted-foreground font-body">Curating results...</p>
+        <div className="text-center py-6">
+          <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto mb-2" />
+          <p className="text-muted-foreground font-body text-sm">Curating results...</p>
         </div>
       )}
 
-      {/* Results */}
+      {/* Results — scrollable container */}
       {photos.length > 0 && (
-        <>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="max-h-[280px] overflow-y-auto rounded-lg scrollbar-none">
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
             {photos.map((photo) => (
               <Card
                 key={photo.id}
@@ -185,8 +185,8 @@ const StepArt = ({ image, uploadedFile, onSelect, onUpload, onNext }: Props) => 
                 <div className="aspect-[4/3] overflow-hidden">
                   <img src={photo.medium} alt={photo.alt} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
                 </div>
-                <div className="p-2">
-                  <p className="text-[10px] text-muted-foreground font-body truncate">📷 {photo.artist}</p>
+                <div className="px-1.5 py-1">
+                  <p className="text-[9px] text-muted-foreground font-body truncate">📷 {photo.artist}</p>
                 </div>
               </Card>
             ))}
@@ -194,44 +194,44 @@ const StepArt = ({ image, uploadedFile, onSelect, onUpload, onNext }: Props) => 
 
           {/* Infinite scroll sentinel */}
           {hasMore && (
-            <div ref={sentinelRef} className="flex justify-center py-6">
-              {loadingMore && <Loader2 className="w-5 h-5 animate-spin text-primary" />}
+            <div ref={sentinelRef} className="flex justify-center py-3">
+              {loadingMore && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
             </div>
           )}
-        </>
+        </div>
       )}
 
       {!loading && !searched && photos.length === 0 && (
-        <div className="text-center py-12">
-          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-            <Camera className="w-7 h-7 text-primary" />
+        <div className="text-center py-6">
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+            <Camera className="w-5 h-5 text-primary" />
           </div>
-          <p className="text-muted-foreground font-body">Loading curated gallery...</p>
+          <p className="text-muted-foreground font-body text-sm">Loading curated gallery...</p>
         </div>
       )}
 
       {!loading && searched && photos.length === 0 && (
-        <p className="text-center text-muted-foreground font-body py-8">No results found. Try a different term.</p>
+        <p className="text-center text-muted-foreground font-body py-4 text-sm">No results found. Try a different term.</p>
       )}
 
       {/* Selected preview + continue */}
       {hasSelection && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border p-4">
-          <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center gap-4">
-            <img src={previewUrl} alt="Selected" className="w-20 h-14 object-cover rounded" />
-            <div className="flex-1 text-center sm:text-left">
-              <p className="text-foreground font-display font-semibold">Your Artwork</p>
-              {image && <p className="text-xs text-muted-foreground font-body">By {image.photographer}</p>}
-              {uploadedFile && <p className="text-xs text-muted-foreground font-body">Your uploaded image</p>}
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border p-3">
+          <div className="max-w-4xl mx-auto flex items-center gap-4">
+            <img src={previewUrl} alt="Selected" className="w-16 h-11 object-cover rounded" />
+            <div className="flex-1">
+              <p className="text-foreground font-display font-semibold text-sm">Your Artwork</p>
+              {image && <p className="text-[10px] text-muted-foreground font-body">By {image.photographer}</p>}
+              {uploadedFile && <p className="text-[10px] text-muted-foreground font-body">Your uploaded image</p>}
             </div>
-            <Button onClick={onNext} className="bg-gradient-gold text-primary-foreground font-body font-semibold hover:opacity-90 gap-2 h-12 px-8">
+            <Button onClick={onNext} className="bg-gradient-gold text-primary-foreground font-body font-semibold hover:opacity-90 gap-2 h-10 px-6 text-sm">
               Choose Size <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
       )}
 
-      <p className="text-center text-[10px] text-muted-foreground/50 font-body">
+      <p className="text-center text-[9px] text-muted-foreground/50 font-body">
         Photos by <a href="https://www.pexels.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Pexels</a> & <a href="https://pixabay.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">Pixabay</a>
       </p>
     </div>
