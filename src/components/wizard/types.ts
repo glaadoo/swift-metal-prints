@@ -68,7 +68,7 @@ export interface WizardState {
   panY: number;
 }
 
-export const TOTAL_STEPS = 4;
+export const TOTAL_STEPS = 5;
 
 export const initialWizardState: WizardState = {
   step: 1,

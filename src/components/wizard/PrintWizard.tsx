@@ -3,11 +3,12 @@ import { initialWizardState, TOTAL_STEPS, type WizardState, type CartItem } from
 import { recommendStandOffs } from "@/lib/pricing";
 import { resolveSize } from "@/lib/sizeHelpers";
 import StepSize from "./StepSize";
+import StepArt from "./StepArt";
 import StepUpsell from "./StepUpsell";
 import StepMounting from "./StepMounting";
 import StepReview from "./StepReview";
 
-const stepLabels = ["Upload & Size", "Personalize", "Finishing", "Review"];
+const stepLabels = ["Size & Material", "Your Photos", "Personalize", "Finishing", "Review"];
 
 interface Props {
   onStepChange?: (step: number) => void;
@@ -35,14 +36,14 @@ const PrintWizard = ({ onStepChange }: Props) => {
 
   const nextStep = () => {
     let next = state.step + 1;
-    if (!isMetal && next === 2) next = 3; // skip upsell for acrylic
+    if (!isMetal && next === 3) next = 4; // skip upsell for acrylic
     if (next > TOTAL_STEPS) next = TOTAL_STEPS;
     update({ step: next });
   };
 
   const prevStep = () => {
     let prev = state.step - 1;
-    if (!isMetal && prev === 2) prev = 1;
+    if (!isMetal && prev === 3) prev = 2;
     if (prev < 1) prev = 1;
     update({ step: prev });
   };
@@ -67,7 +68,7 @@ const PrintWizard = ({ onStepChange }: Props) => {
               const stepNum = i + 1;
               const isActive = state.step === stepNum;
               const isDone = state.step > stepNum;
-              const isSkipped = !isMetal && stepNum === 2;
+              const isSkipped = !isMetal && stepNum === 3;
 
               if (isSkipped) return null;
 
@@ -100,7 +101,7 @@ const PrintWizard = ({ onStepChange }: Props) => {
           </div>
         </div>
 
-        {/* Steps */}
+        {/* Step 1: Size & Material */}
         {state.step === 1 && (
           <StepSize
             imageUrl={imageUrl}
@@ -130,7 +131,19 @@ const PrintWizard = ({ onStepChange }: Props) => {
           />
         )}
 
-        {state.step === 2 && isMetal && (
+        {/* Step 2: Upload & Adjust Photos */}
+        {state.step === 2 && (
+          <StepArt
+            image={state.image}
+            uploadedFile={state.uploadedFile}
+            onSelect={(img) => update({ image: img, uploadedFile: null, imageNaturalWidth: 0, imageNaturalHeight: 0, rotation: 0, zoom: 1, panX: 0, panY: 0 })}
+            onUpload={(dataUrl, w, h) => update({ uploadedFile: dataUrl, image: null, imageNaturalWidth: w, imageNaturalHeight: h, rotation: 0, zoom: 1, panX: 0, panY: 0 })}
+            onNext={nextStep}
+          />
+        )}
+
+        {/* Step 3: Personalize (metal upsell) */}
+        {state.step === 3 && isMetal && (
           <StepUpsell
             frontImage={imageUrl}
             backImage={state.backImage}
@@ -148,7 +161,8 @@ const PrintWizard = ({ onStepChange }: Props) => {
           />
         )}
 
-        {state.step === 3 && (
+        {/* Step 4: Finishing */}
+        {state.step === 4 && (
           <StepMounting
             sizeIdx={state.sizeIdx}
             customWidth={state.customWidth}
@@ -167,7 +181,8 @@ const PrintWizard = ({ onStepChange }: Props) => {
           />
         )}
 
-        {state.step === 4 && (
+        {/* Step 5: Review */}
+        {state.step === 5 && (
           <StepReview
             state={state}
             onBack={prevStep}
