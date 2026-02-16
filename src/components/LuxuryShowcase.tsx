@@ -12,7 +12,7 @@ const slides = [
   {
     image: metalLiving,
     label: "Grand Scale",
-    caption: "A grand luxury wall awaiting your vision — imagine your art at monumental scale.",
+    caption: "A monumental wedding portrait on metal commands a grand living room with breathtaking presence.",
   },
   {
     image: acrylicDining,
