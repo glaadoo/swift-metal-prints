@@ -19,13 +19,13 @@ interface Props {
   onBack: () => void;
 }
 
-const materials: { id: MaterialChoice; label: string; subtitle: string; img: string; cornerImg: string; features: string[]; icon: React.ReactNode; metalIdx?: number }[] = [
+const materials: { id: MaterialChoice; label: string; subtitle: string; img: string; cornerImg?: string; features: string[]; icon: React.ReactNode; metalIdx?: number }[] = [
   {
     id: "acrylic",
     label: "Acrylic",
     subtitle: "Vivid & Luminous",
     img: acrylicImg,
-    cornerImg: cornerAcrylic,
+    cornerImg: undefined,
     features: ["Face-mounted to 1/4\" acrylic", "Extraordinary depth & vibrancy", "UV-resistant archival inks", "Gallery-ready polished edges"],
     icon: <Sparkles className="w-5 h-5" />,
   },
@@ -92,9 +92,11 @@ const StepMaterial = ({ imageUrl, sizeIdx, material, onSelect, onNext, onBack }:
                     <Check className="w-4 h-4 text-primary-foreground" />
                   </div>
                 )}
-                <div className="absolute bottom-3 left-3 w-14 h-14 rounded border border-border/50 overflow-hidden shadow-lg">
-                  <img src={mat.cornerImg} alt={`${mat.label} corner detail`} className="w-full h-full object-cover" />
-                </div>
+                {mat.cornerImg && (
+                  <div className="absolute bottom-3 left-3 w-14 h-14 rounded border border-border/50 overflow-hidden shadow-lg">
+                    <img src={mat.cornerImg} alt={`${mat.label} corner detail`} className="w-full h-full object-cover" />
+                  </div>
+                )}
                 {isMetal && (
                   <div className="absolute bottom-3 right-3">
                     <Badge className="bg-card/80 backdrop-blur-sm text-foreground border-0 font-body text-[10px] gap-1">
