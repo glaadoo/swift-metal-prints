@@ -126,8 +126,10 @@ const PrintWizard = ({ onStepChange }: Props) => {
             panY={state.panY}
             customWidth={state.customWidth}
             customHeight={state.customHeight}
+            quantity={state.quantity}
             onSelect={(idx) => update({ sizeIdx: idx })}
             onCustomSize={(w, h) => update({ customWidth: w, customHeight: h })}
+            onQuantity={(q) => update({ quantity: q })}
             onSelectMaterial={(m) => update({ material: m, doubleSided: false, backImage: null, backUploadedFile: null })}
             onCompanionChange={(cp) => update({ companionPrint: cp })}
             onRotate={(r) => update({ rotation: r })}
@@ -186,6 +188,7 @@ const PrintWizard = ({ onStepChange }: Props) => {
                 sizeIdx: state.sizeIdx,
                 customWidth: state.customWidth,
                 customHeight: state.customHeight,
+                quantity: state.quantity,
                 material: state.material,
                 doubleSided: state.doubleSided,
                 backImage: state.backImage,
