@@ -254,7 +254,7 @@ const StepSize = ({
           </div>
           <div className="flex gap-6 text-xs font-body text-muted-foreground/70">
             <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-primary" /> Museum-grade print</span>
-            <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-primary" /> Ships in 3–5 days</span>
+            <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-primary" /> Arrives in 48–72 hours</span>
             <span className="flex items-center gap-1"><Check className="w-3.5 h-3.5 text-primary" /> Lifetime guarantee</span>
           </div>
           <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
