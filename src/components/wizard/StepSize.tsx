@@ -453,9 +453,6 @@ const StepSize = ({
             {sizeGroups[activeGroup].sizes.filter(i => i < standardSizes.length).map((i) => {
               const size = standardSizes[i];
               const isSelected = i === sizeIdx;
-              const aspect = size.w / size.h;
-              // Visual preview: cap the rendered ratio to 0.4–2.5 for readability
-              const previewAspect = Math.max(0.4, Math.min(2.5, aspect));
               const price = startingPrice(size.w, size.h);
 
               return (
@@ -481,11 +478,9 @@ const StepSize = ({
                     <div
                       className={`border-2 transition-colors ${isSelected ? "border-primary bg-primary/15" : "border-muted-foreground/30 bg-muted/30"}`}
                       style={{
-                        aspectRatio: previewAspect,
+                        aspectRatio: `${size.w} / ${size.h}`,
                         maxWidth: "100%",
                         maxHeight: 44,
-                        width: previewAspect >= 1 ? "100%" : `${previewAspect * 44}px`,
-                        height: previewAspect >= 1 ? `${(1 / previewAspect) * 100}%` : "100%",
                       }}
                     />
                   </div>
