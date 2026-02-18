@@ -474,15 +474,26 @@ const StepSize = ({
                     </div>
                   )}
                   {/* Visual ratio rectangle */}
-                  <div className="flex items-center justify-center w-full" style={{ height: 44 }}>
-                    <div
-                      className={`border-2 transition-colors ${isSelected ? "border-primary bg-primary/15" : "border-muted-foreground/30 bg-muted/30"}`}
-                      style={{
-                        aspectRatio: `${size.w} / ${size.h}`,
-                        maxWidth: "100%",
-                        maxHeight: 44,
-                      }}
-                    />
+                  <div className="flex items-center justify-center" style={{ width: 44, height: 44, flexShrink: 0 }}>
+                    {size.w >= size.h ? (
+                      // Landscape / square: full width, height derived
+                      <div
+                        className={`border-2 transition-colors ${isSelected ? "border-primary bg-primary/15" : "border-muted-foreground/30 bg-muted/30"}`}
+                        style={{
+                          width: 44,
+                          height: Math.round(44 * size.h / size.w),
+                        }}
+                      />
+                    ) : (
+                      // Portrait: full height, width derived
+                      <div
+                        className={`border-2 transition-colors ${isSelected ? "border-primary bg-primary/15" : "border-muted-foreground/30 bg-muted/30"}`}
+                        style={{
+                          height: 44,
+                          width: Math.round(44 * size.w / size.h),
+                        }}
+                      />
+                    )}
                   </div>
                   <div className="text-center">
                     <p className={`text-[11px] font-display font-bold leading-tight ${isSelected ? "text-primary" : "text-foreground"}`}>
